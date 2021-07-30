@@ -37,5 +37,12 @@ Proyecto en colaboración con la UMU (Pascual, pascualf@um.es) y Anabel e Isabel
    - Es el formato del consentimiento (experesado en una frase o en la mitad del texto)?
 
 
+## Trabajos relacionados
+
+- https://www.kaggle.com/c/commonlitreadabilityprize
+
+
+
+
 
 
