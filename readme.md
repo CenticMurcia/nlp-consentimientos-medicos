@@ -45,8 +45,8 @@ Proyecto en colaboración con la UMU (Pascual, pascualf@um.es) y Anabel e Isabel
 Dimensiones:
 - Nivel del paciente (infantil, adulto nivel bajo, adulto nivel medio)
 - Tipo de intervenccion (quirurjica, invasiva, etc)
-- porcentaje de posibles consecuencias (inofensivo, medio, peligroso)
-
+- Porcentaje de posibles consecuencias (inofensivo, medio, peligroso)
+- Nivel de empatia hacia el paciente
 
 
 
