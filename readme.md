@@ -43,8 +43,11 @@ Proyecto en colaboración con la UMU (Pascual, pascualf@um.es) y Anabel e Isabel
 ## Parte 2: Generar nuestras plantillas de consentimientos
 
 Dimensiones:
+
+Practica clinica
 - Nivel del paciente (infantil, adulto nivel bajo, adulto nivel medio)
-- Tipo de intervenccion (quirurjica, invasiva, etc)
+- Tipo de intervenccion (quirurjica, invasiva, tratamiento, etc)
+- Especialidad médica
 - Porcentaje de posibles consecuencias (inofensivo, medio, peligroso)
 - Nivel de empatia hacia el paciente
 
