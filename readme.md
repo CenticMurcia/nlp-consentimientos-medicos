@@ -8,7 +8,9 @@ Determinacion de la legibilidad y entendibilidad de consentimientos médicos en 
 Proyecto en colaboración con la UMU (Pascual, pascualf@um.es) y Anabel e Isabel (de la univesidad Jaume I de Castellón).
 
 
-### Pasos del proyecto
+## Pasos del proyecto
+
+## Parte 1 (analisis de los consentimientos disponibles)
 
 1. Recopilación de los textos (Hecho por Pascual)
    - De los PDFs se extraerán los textos `.txt`
@@ -35,6 +37,17 @@ Proyecto en colaboración con la UMU (Pascual, pascualf@um.es) y Anabel e Isabel
    - Es la cantidad de vocabulario legal?
    - Es la cantidad de palabras poco comunes?
    - Es el formato del consentimiento (experesado en una frase o en la mitad del texto)?
+
+
+
+## Parte 2: Generar nuestras plantillas de consentimientos
+
+Dimensiones:
+- Nivel del paciente (infantil, adulto nivel bajo, adulto nivel medio)
+- Tipo de intervenccion (quirurjica, invasiva, etc)
+- porcentaje de posibles consecuencias (inofensivo, medio, peligroso)
+
+
 
 
 ## Trabajos relacionados
