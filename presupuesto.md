@@ -46,8 +46,8 @@
   - Sacar metricas anteriores de **por grupos** de textos, (en lugar de por textos induviduales).
 
 ### Generar informe final del script (3 días)
-- Generar resualtdos/informe/report/graficas
-- Probablente Streamlit sea la mejor herramienta para entregar nuestro script de analisis de texos
+- Generar resultados/informe/report/graficas
+- Probablente **Streamlit** sea la mejor herramienta para entregar nuestro script de analisis de texos
 - Capacidad de exportar la tabla de metricas que saquemos y las gráficas a Excel
 
 ### Formación del uso del script (2 días)
