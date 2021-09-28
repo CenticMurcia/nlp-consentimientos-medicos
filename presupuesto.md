@@ -1,5 +1,5 @@
 ### Script de PDFs a textos limpios (3..5 días)
-- Sobre la conversion desde PDF:
+- Sobre la conversión desde PDF:
   - Buscar el comando de terminal (o paquete de python) adecuado.
   - Pascual ya ha hecho cosas con la terminal del Mac.
 - Sobre la limpieza:
@@ -28,7 +28,7 @@
 - Nos darán la lista de metricas a implementar.
 - Ejemplo de metricas:
   - Metrica **Flex index** (para textos en inglés)
-  - Metrica **Fernandez Huertas** (para textos en inglés)
+  - Metrica **Fernandez Huertas** (para textos en español)
 
 
 ### Metricas que hacen uso de datos externos (4..5 días)
