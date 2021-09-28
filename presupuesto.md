@@ -1,4 +1,4 @@
-### Script de PDFs a textos limpios (3..5 días)
+### Script de PDFs a textos limpios (5 días)
 - Sobre la conversión desde PDF:
   - Buscar el comando de terminal (o paquete de python) adecuado.
   - Pascual ya ha hecho cosas con la terminal del Mac.
@@ -31,7 +31,7 @@
   - Metrica **Fernandez Huertas** (para textos en español)
 
 
-### Metricas que hacen uso de datos externos (4..5 días)
+### Metricas que hacen uso de datos externos (5 días)
 - Metricas que cotejan con listas de vocabulario externas para sacar porcentajes.
 - Se nos darán las listas de vocabulario o nos dirán como descargarlas.
 - Ejemplo de listas de vocalario:
