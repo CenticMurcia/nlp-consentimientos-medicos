@@ -16,7 +16,7 @@ Proyecto en colaboración con la UMU (Pascual, pascualf@um.es) y Anabel e Isabel
    - De los PDFs se extraerán los textos `.txt`
    - Serán 100 textos en español y 50 en catalán.
 2. Etiquetado morfológico (POS tagging)
-   - Usando [Freeling](http://nlp.lsi.upc.edu/freeling/node/1) 
+   - Usando [Freeling](http://nlp.lsi.upc.edu/freeling/node/1) porque sigue el estándard de [EAGLES](http://blade10.cs.upc.edu/freeling-old/doc/tagsets/tagset-es.html)
 3. Generar Features de los textos. Por ejemplo:
    - Longitud del texto (numero de palabras, letras, etc).
    - Proporción de sustantivos, verbos, adverbios
