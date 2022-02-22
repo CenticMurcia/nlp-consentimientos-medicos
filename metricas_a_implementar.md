@@ -2,17 +2,17 @@
 ## Métricas básicas
 
 - Número de letras en el texto
-- Número de silabas en el texto
+- Número de sílabas en el texto
 - Número de palabras en el texto (tokens)
 - Número de palabras unicas en el texto (Tipos)
 - Número de frases en el texto (oraciones)
-- Ratio Tipo/Token (es un numero entre 0 y 1)
+- Ratio Tipo/Token (es un número entre 0 y 1)
 - Tiempo (en minutos) estimado de lectura:
   - Para lector Basico (150 tokens por minuto)
   - Para lector Medio  (250 tokens por minuto)
   - Para lector Rápido (350 tokens por minuto)
 - Métricas de legibilidad:
-  - Indice Fernande Huerta (L)     = 206.84 - (0.6 * num_tokens) - (1.02 * num_frases)
+  - Indice Fernandez Huerta (L)     = 206.84 - (0.6 * num_tokens) - (1.02 * num_frases)
   - Indice de comprensibilidad (C) = 95.2 - (9.7 * num_letras / num_tokens) - (0.35 * num_tokens / num_frases)
   - Índice de perspecuidad (P)     = 206.835 - (62.3 * num_silabas / num_tokens) - (num_tokens / num_frases)
   - Índice mu = (num_tokens / (num_tokens - 1)) * ( letras_por_palabra.mean() / letras_por_palabra.varianza() ) * 100
@@ -22,14 +22,14 @@
 ## Métricas de vocabulario externo
 
 > ### Sacar metricas para:
-> 1. Numero absoluto de tokens
-> 2. Numero porcentaje de tokens
-> 3. Numero absoluto de tokens unicos (tipos)
-> 4. Numero porcentaje de tokens unicos (tipos)
-> 5. Numero absoluto de lemmas [OCIONAL]
-> 6. Numero porcentaje de lemmas [OCIONAL]
-> 7. Numero absoluto de lemmas unicos [OCIONAL]
-> 8. Numero porcentaje de lemmas unicos [OCIONAL]
+> 1. Número absoluto de tokens
+> 2. Número porcentaje de tokens
+> 3. Número absoluto de tokens unicos (tipos)
+> 4. Número porcentaje de tokens unicos (tipos)
+> 5. Número absoluto de lemmas [OCIONAL]
+> 6. Número porcentaje de lemmas [OCIONAL]
+> 7. Número absoluto de lemmas unicos [OCIONAL]
+> 8. Número porcentaje de lemmas unicos [OCIONAL]
 
 - Vocabulario de lenguaje juridico especialiaado
 - Vocabulario de lenguaje médico especialidao

@@ -1,0 +1,37 @@
+     PACIENTE Apellidos
+Nombre
+Número Historia Fecha nacimiento
+No S I P
+                         Lugar reservado para la etiqueta identificativa
+      HOSPITAL SAGUNT I C.E.
+CONSENTIMIENTO INFORMADO: TAC
+¿Qué le vamos a hacer?
+Le vamos a realizar un T.A.C. para establecer un diagnóstico de su
+enfermedad. Esta exploración radiológica requiere en su caso la administración intravenosa de contraste yodado, para lo cual hay que pincharle una vena e introducir una cantidad variable de dicho contraste.
+La exploración no necesita anestesia y dura aproximadamente 20 minutos. Los resultados que se obtienen compensan los posibles riesgos que a continuación le exponemos.
+¿Qué riesgos tiene?
+* Por medio del contraste: Reacciones alérgicas (leves como náuseas, picores
+o lesiones en la piel), raramente graves como alteraciones de los riñones y excepcionalmente muy graves (1 de cada 100.000 pacientes).
+* Por la técnica que estamos realizando: Salida del líquido durante la inyección (extravasación), que puede producirle dolor, la mayoría de las veces sin consecuencias.
+De todas formas, si ocurriera alguna complicación no dude de que todos los medios médicos de este hospital están dispuestos para intentar solucionarlas.
+¿Qué otras alternativas hay?
+En la actualidad existen otras exploraciones que nos aportan información, como es la Ecografía o la Resonancia.
+Antes de firmar este documento, si desea más información o tiene cualquier duda, no tenga reparo en preguntarnos. Le atenderemos con mucho gusto.
+DECLARACIONES Y FIRMAS (Ley 41/2002 de 14 Noviembre)
+He informado suficientemente al paciente y de forma comprensible de la
+exploración que se le va a realizar, así como de sus riesgos y complicaciones
+              Facultativo
+     Facultativo Radiólogo
+     Dr.D/Da
+      Dr. D/Da
+        Colegiado No
+      Colegiado No
+        Servicio:
+      Servicio:
+        Fecha
+          Fecha
+          Firma
+      Firma
+      D/Da... con DNI... He sido informado suficientemente de la exploración que se me va a realizar, explicándome sus riesgos y complicaciones. Mi aceptación a que se me realice es voluntaria, pudiendo retirar este consentimiento cuando lo crea oportuno. Firma del paciente/familiar/tutor
+Fecha../.../.
+NOTA: este documento se entregará firmado, previo a la realización de la exploración, a la cual Vd. da su consentimiento.
