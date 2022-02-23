@@ -51,6 +51,9 @@
 > 5. Conteo de etiquetas_mor entre palabras que solo aparcen 1 vez (hápax legomena)
 > 6. Porcentaje de etiquetas_mor entre palabras que solo aparcen 1 vez (hápax legomena)
 
+Enlace con la explicación de los tags usados por Freeling:
+https://freeling-user-manual.readthedocs.io/en/latest/tagsets/tagset-es/
+
 - N: Sutantivos (1_tipo, 4_class)
   - NC: Comun
   - NP: Propio
