@@ -1,5 +1,3 @@
-from io import StringIO
-from bs4 import UnicodeDammit
 import streamlit as st
 import requests
 from unicodedata import normalize
@@ -38,14 +36,12 @@ uploaded_files = st.file_uploader(label= 'Tus ficheros aquí', accept_multiple_f
 
 for uploaded_file in uploaded_files:
     string_data = uploaded_file.getvalue()
-    dammit = UnicodeDammit(string_data)
     string_data = string_data.decode('utf-8')
+    
     # ESTA LINEA ME HA LLEVADO 3 HORAS PARA SABER QUE FALLABA
     # Los caracteres vienen separados por su codigo individual, de forma
     # que los acentos vienen codificados como a´ en vez de á. UN DRAMA
     string_data = normalize("NFC", string_data)
-
-    st.warning(dammit.original_encoding)
     st.write('Fichero leido con éxito :sunglasses:')
     st.write(string_data)
     obj = freeling_processing(document=string_data, language='es')
