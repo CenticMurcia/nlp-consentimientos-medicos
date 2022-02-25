@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 from unicodedata import normalize
 
-
+@st.cache
 def freeling_processing(document='4111_OR_ES.txt',
                         language='es'):
     # File to send
@@ -21,22 +21,23 @@ def freeling_processing(document='4111_OR_ES.txt',
 
 
 def extract_metrics(document):
-    #st.write(document[0][0])
+
+    col1, col2, col3, col4 = st.columns(4)
     # - Número de letras en el texto
     n_chars = sum([len(word['token']) for phrase in document for word in phrase])
-    st.write(f"Número de letras/caracteres (sin espacios): {n_chars}")
+    col1.metric("Número de letras/caracteres (sin espacios):" , value=n_chars)
     # - Número de sílabas en el texto
     # Nope
     # - Número de palabras en el texto (tokens)
     n_words = len([word for phrase in document for word in phrase])
-    st.write(f"Número de palabras: {n_words}")
+    col2.metric("Número de palabras:" , value=n_words)
     # - Número de palabras unicas en el texto (Tipos)
     n_unique_words = len(set([word['token']
                          for phrase in document for word in phrase]))
-    st.write(f"Número de palabras únicas: {n_unique_words}")
+    col3.metric("Número de palabras únicas:", value = n_unique_words)
     # - Número de frases en el texto (oraciones)
     n_phrases = len([phrase for phrase in document])
-    st.write(f"Número de oraciones: {n_phrases}")
+    col4.metric("Número de oraciones:", value = n_phrases)
 
     #
 
