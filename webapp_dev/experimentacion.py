@@ -27,23 +27,45 @@ def extract_metrics(document):
     # - Número de letras en el texto
     n_chars = sum([len(word['token'])
                   for phrase in document for word in phrase])
-    col1.metric("Número de letras/caracteres (sin espacios):", value=n_chars)
+    col1.metric("Caracteres (sin espacios):", value=n_chars)
     # - Número de sílabas en el texto
     # Nope
     # - Número de palabras en el texto (tokens)
     n_words = len([word for phrase in document for word in phrase])
-    col2.metric("Número de palabras:", value=n_words)
+    col2.metric("Palabras:", value=n_words)
     # - Número de palabras unicas en el texto (Tipos)
     n_unique_words = len(set([word['token']
                          for phrase in document for word in phrase]))
-    col3.metric("Número de palabras únicas:", value=n_unique_words)
+    col3.metric("Palabras únicas:", value=n_unique_words)
     # - Número de frases en el texto (oraciones)
     n_phrases = len([phrase for phrase in document])
-    col4.metric("Número de oraciones:", value=n_phrases)
+    col4.metric("Oraciones:", value=n_phrases)
+
+    morpho_count = morphological_metrics(document)
+    col1.write(morpho_count)
 
 
 def morphological_metrics(document):
     """Extracts the number of nouns, verbs, adjectives, etc"""
+
+    morpho_count = {
+        'N': 0,    # Nouns
+        'A': 0,    # Adjectives
+        'C': 0,    # Conjuctions
+        'R': 0,    # Adverbs
+        'V': 0,    # Verbs
+        'D': 0,    # Determinants
+        'P': 0,    # Pronouns
+    }
+
+    # Iterate the json and check the first letter (type)
+    # of each word detected by Freeling. Then count on that
+    # category
+    for phrase in document:
+        for word in phrase:
+            if word['tag'][0] in morpho_count:
+                morpho_count[word['tag'][0]] += 1
+    return morpho_count
 
 
 #--------------#
@@ -72,7 +94,6 @@ for uploaded_file in uploaded_files:
         except:
             print('File encoding is not supported')
 
-
     # Chars can be codified as 'a´' o 'á'
     # Let's transform all of them to "á", because Freeling takes 'a´'
     # as separated chars and break words because of this
@@ -84,6 +105,6 @@ for uploaded_file in uploaded_files:
 
     with st.spinner('Procesando texto en Freeling...'):
         document = freeling_processing(document=string_data, language='es')
-    #st.json(document[0])
+    # st.json(document[0])
 
     extract_metrics(document)
