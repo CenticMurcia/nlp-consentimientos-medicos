@@ -21,30 +21,25 @@ def freeling_processing(document='4111_OR_ES.txt',
     return obj
 
 
+@st.cache
 def extract_metrics(document):
 
-    col1, col2, col3, col4 = st.columns(4)
     # - Número de letras en el texto
     n_chars = sum([len(word['token'])
                   for phrase in document for word in phrase])
-    col1.metric("Caracteres (sin espacios):", value=n_chars)
     # - Número de sílabas en el texto
     # Nope
     # - Número de palabras en el texto (tokens)
     n_words = len([word for phrase in document for word in phrase])
-    col2.metric("Palabras:", value=n_words)
     # - Número de palabras unicas en el texto (Tipos)
     n_unique_words = len(set([word['token']
                          for phrase in document for word in phrase]))
-    col3.metric("Palabras únicas:", value=n_unique_words)
     # - Número de frases en el texto (oraciones)
     n_phrases = len([phrase for phrase in document])
-    col4.metric("Oraciones:", value=n_phrases)
-
-    morpho_count = morphological_metrics(document)
-    col1.write(morpho_count)
+    return n_chars, n_words, n_unique_words, n_phrases
 
 
+@st.cache
 def morphological_metrics(document):
     """Extracts the number of nouns, verbs, adjectives, etc"""
 
@@ -105,6 +100,13 @@ for uploaded_file in uploaded_files:
 
     with st.spinner('Procesando texto en Freeling...'):
         document = freeling_processing(document=string_data, language='es')
-    # st.json(document[0])
 
-    extract_metrics(document)
+    col1, col2, col3, col4 = st.columns(4)
+
+    n_chars, n_words, n_unique_words, n_phrases = extract_metrics(document)
+    morpho_count = morphological_metrics(document)
+    col1.metric("Caracteres (sin espacios):", value=n_chars)
+    col2.metric("Palabras:", value=n_words)
+    col3.metric("Palabras únicas:", value=n_unique_words)
+    col4.metric("Oraciones:", value=n_phrases)
+    col1.write(morpho_count)
