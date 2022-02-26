@@ -5,8 +5,10 @@ argon2-cffi-bindings==21.2.0
 astor==0.8.1
 asttokens==2.0.5
 attrs==21.4.0
+autopep8==1.6.0
 backcall==0.2.0
 base58==2.1.1
+beautifulsoup4==4.10.0
 black==22.1.0
 bleach==4.1.0
 blinker==1.4
@@ -33,6 +35,7 @@ gitdb==4.0.9
 GitPython==3.1.26
 huggingface-hub==0.4.0
 idna==3.3
+importlib-metadata==4.11.1
 ipykernel==6.9.1
 ipython==8.0.1
 ipython-genutils==0.2.0
@@ -74,6 +77,7 @@ protobuf==3.19.4
 ptyprocess==0.7.0
 pure-eval==0.2.2
 pyarrow==7.0.0
+pycodestyle==2.8.0
 pycparser==2.21
 pydantic==1.8.2
 pydeck==0.7.1
@@ -89,10 +93,12 @@ pyzmq==22.3.0
 regex==2022.1.18
 requests==2.27.1
 sacremoses==0.0.47
+semver==2.13.0
 Send2Trash==1.8.0
 six==1.16.0
 smart-open==5.2.1
 smmap==5.0.0
+soupsieve==2.3.1
 spacy==3.2.2
 spacy-alignments==0.8.4
 spacy-legacy==3.0.8
@@ -100,7 +106,7 @@ spacy-loggers==1.0.1
 spacy-transformers==1.1.4
 srsly==2.4.2
 stack-data==0.2.0
-streamlit==1.5.1
+streamlit==1.6.0
 terminado==0.13.1
 testpath==0.5.0
 thinc==8.0.13
@@ -120,6 +126,8 @@ tzlocal==4.1
 urllib3==1.26.8
 validators==0.18.2
 wasabi==0.9.0
+watchdog==2.1.6
 wcwidth==0.2.5
 webencodings==0.5.1
 widgetsnbextension==3.5.2
+zipp==3.7.0
