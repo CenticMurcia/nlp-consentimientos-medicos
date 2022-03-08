@@ -69,6 +69,7 @@ pathy==0.6.1
 pexpect==4.8.0
 pickleshare==0.7.5
 Pillow==9.0.1
+pip-autoremove==0.10.0
 platformdirs==2.5.0
 preshed==3.0.6
 prometheus-client==0.13.1
@@ -99,11 +100,6 @@ six==1.16.0
 smart-open==5.2.1
 smmap==5.0.0
 soupsieve==2.3.1
-spacy==3.2.2
-spacy-alignments==0.8.4
-spacy-legacy==3.0.8
-spacy-loggers==1.0.1
-spacy-transformers==1.1.4
 srsly==2.4.2
 stack-data==0.2.0
 streamlit==1.6.0
