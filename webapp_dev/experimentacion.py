@@ -51,7 +51,7 @@ def morphological_metrics(document):
         'V': 0,    # Verbs
         'D': 0,    # Determinants
         'P': 0,    # Pronouns
-        'F': 0     # Punctuation
+        'F': 0     # Punctuation
     }
 
     # Iterate the json and check the first letter (type)
