@@ -2,3 +2,4 @@ cons_medicos/
 .vscode
 .DS_Store
 exp_exp.py
+*.pyc
