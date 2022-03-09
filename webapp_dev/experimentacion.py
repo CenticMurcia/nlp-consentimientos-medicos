@@ -1,15 +1,20 @@
 import streamlit as st
 import requests
 from unicodedata import normalize
+import altair as alt
 
 
 @st.cache
 def freeling_processing(document='4111_OR_ES.txt',
-                        language='es'):
+                        language='Español'):
     # File to send
     file = document
     files = {'file': file}
     # Parameters
+    if language == 'Español':
+        language = 'es'
+    else:
+        language = 'cat'
     params = {'outf': 'tagged', 'format': 'json', 'lang': language}
     # Send request
     url = "http://www.corpus.unam.mx/servicio-freeling/analyze.php"
@@ -67,9 +72,6 @@ def morphological_metrics(document):
 #--------------#
 #### WEBAPP ####
 #--------------#
-def example_callback():
-    print('TEST')
-
 
 # Browser title, favicon and about section
 st.set_page_config(
@@ -85,13 +87,20 @@ st.set_page_config(
 st.title('CENTIC FTW')
 st.write("""Esta herramienta tiene la intención de facilitar el análisis de textos
         mediante técnicas de procesamiento del lenguaje natural.""")
-uploaded_files = st.file_uploader(
-    label='Tus ficheros aquí',
-    accept_multiple_files=True,
-    on_change=example_callback,
-    type=['txt'])
 
+col1, space, col2 = st.columns([1, 0.5, 3])
+# Language selection
+with col1:
+    slctd_lang = st.radio(
+        "Seleccione el idioma de los ficheros de entrada",
+        ('Español', 'Catalán'))
+with col2:
+    uploaded_files = st.file_uploader(
+        label='Tus ficheros aquí',
+        accept_multiple_files=True,
+        type=['txt'])
 
+# Loop for every uploaded file
 for uploaded_file in uploaded_files:
     # Read the files as 'utf-8' or 'latin-1'
     string_data = None
@@ -111,16 +120,16 @@ for uploaded_file in uploaded_files:
     string_data = normalize("NFC", string_data)
 
     st.header(f"Documento: {uploaded_file.name}")
-    # Inform the user of success read
-    # st.success('Fichero leido con éxito :sunglasses:')
 
     with st.spinner('Procesando texto en Freeling...'):
-        document = freeling_processing(document=string_data, language='es')
+        document = freeling_processing(
+            document=string_data, language=slctd_lang)
 
     col1, col2, col3, col4 = st.columns(4)
 
     n_chars, n_words, n_unique_words, n_phrases = extract_metrics(document)
     morpho_count = morphological_metrics(document)
+
     col1.metric("Caracteres (sin espacios):", value=n_chars)
     col2.metric("Palabras:", value=n_words)
     col3.metric("Palabras únicas:", value=n_unique_words)
@@ -130,7 +139,7 @@ for uploaded_file in uploaded_files:
     col3.metric("T. Lento", value=str(round(n_words/150, 2)) + ' min')
     col1.metric("Sustantivos:", value=morpho_count['N'])
     col2.metric("Sustantivos/Total:",
-                value=str(round(morpho_count['N']/n_words, 4)*100)+ "%")
+                value=str(round(morpho_count['N']/n_words, 4)*100) + "%")
     col1.metric("Adjetivos:", value=morpho_count['A'])
     col2.metric("Adjetivos/Total:", value=round(morpho_count['A']/n_words, 3))
     col1.metric("Conjunciones:", value=morpho_count['C'])

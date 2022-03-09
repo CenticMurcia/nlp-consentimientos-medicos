@@ -13,10 +13,10 @@
   - Para lector Medio  (250 tokens por minuto)
   - Para lector Rápido (350 tokens por minuto)
 - Métricas de legibilidad:
-  - Indice Fernandez Huerta (L)     = 206.84 - (0.6 *num_tokens) - (1.02* num_frases)
-  - Indice de comprensibilidad (C) = 95.2 - (9.7 *num_letras / num_tokens) - (0.35* num_tokens / num_frases)
-  - Índice de perspecuidad (P)     = 206.835 - (62.3 * num_silabas / num_tokens) - (num_tokens / num_frases)
-  - Índice mu = (num_tokens / (num_tokens - 1)) *( letras_por_palabra.mean() / letras_por_palabra.varianza() )* 100
+  - Indice Fernandez Huerta (L)     = 206.84 - (0.6 \* num_tokens) - (1.02 \* num_frases)
+  - Indice de comprensibilidad (C) = 95.2 - (9.7 \* num_letras / num_tokens) - (0.35 \* num_tokens / num_frases)
+  - Índice de perspecuidad (P)     = 206.835 - (62.3 \* num_silabas / num_tokens) - (num_tokens / num_frases)
+  - Índice mu = (num_tokens / (num_tokens - 1)) \* ( letras_por_palabra.mean() / letras_por_palabra.varianza() )\* 100
 
 ## Métricas de vocabulario externo
 
