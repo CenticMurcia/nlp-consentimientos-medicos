@@ -77,6 +77,6 @@ for uploaded_file in uploaded_files:
 
     n_chars, n_words, n_unique_words, n_phrases = dp.extract_metrics(document)
     morpho_count = dp.morphological_metrics(document)
-
+    st.write(document)
 
     # show_metrics()

@@ -54,7 +54,7 @@ def morphological_metrics(document):
         'C': 0,    # Conjuctions
         'R': 0,    # Adverbs
         'V': 0,    # Verbs
-        'D': 0,    # Determinants
+        'D': 0,    # Determiners
         'P': 0,    # Pronouns
         'F': 0     # Punctuation
     }
