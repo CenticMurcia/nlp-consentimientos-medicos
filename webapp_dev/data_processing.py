@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 from unicodedata import normalize
 import data_processing as dp
+from time import perf_counter
 
 
 @st.cache
@@ -44,28 +45,35 @@ def extract_metrics(document):
     return n_chars, n_words, n_unique_words, n_phrases
 
 
-@st.cache
+def example(index, char, iterator):
+    return sum(1 for _ in filter(lambda tag: tag[index] == char, iterator))
+
 def morphological_metrics(document):
     """Extracts the number of nouns, verbs, adjectives, etc"""
 
-    morpho_count = {
-        'N': 0,    # Nouns
-        'A': 0,    # Adjectives
-        'C': 0,    # Conjuctions
-        'R': 0,    # Adverbs
-        'V': 0,    # Verbs
-        'D': 0,    # Determiners
-        'P': 0,    # Pronouns
-        'F': 0     # Punctuation
-    }
-
-    # Iterate the json and check the first letter (type)
-    # of each word detected by Freeling. Then count on that
-    # category
+    # Get all tags
+    morpho_count = {}
+    i1 = perf_counter()
+    elements = []
     for phrase in document:
-        for word in phrase:
-            if word['tag'][0] in morpho_count:
-                morpho_count[word['tag'][0]] += 1
+        elements += phrase
+
+    tags = list(map(lambda word: word['tag'], elements))
+
+    # Filter by categories
+    noun_tags = list(filter(lambda tag: tag[0] == 'N', tags))
+    adjective_tags = list(filter(lambda tag: tag[0] == 'A', tags))
+    conjunction_tags = list(filter(lambda tag: tag[0] == 'C', tags))
+    adverb_tags = list(filter(lambda tag: tag[0] == 'R', tags))
+    verb_tags = list(filter(lambda tag: tag[0] == 'V', tags))
+    determiner_tags = list(filter(lambda tag: tag[0] == 'D', tags))
+    pronoun_tags = list(filter(lambda tag: tag[0] == 'P', tags))
+
+    nouns_count = len(noun_tags)
+    common_noun_count = sum(1 for _ in filter(lambda tag: tag[1] == 'C', noun_tags))
+    proper_noun_count = sum(1 for _ in filter(lambda tag: tag[1] == 'P', noun_tags))
+    i2 = perf_counter()
+    print(f"Tiempo de procesamiento morfologico: {i2-i1:0.6f}")
     return morpho_count
 
 

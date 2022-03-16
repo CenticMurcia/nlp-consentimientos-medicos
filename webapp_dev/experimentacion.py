@@ -43,14 +43,14 @@ def show_metrics():
 st.set_page_config(
     page_title="NLP Processor",
     page_icon="📘",
-    # layout="centered",
+    layout="wide",
     menu_items={
         'About': "Developed by CENTIC. For bugs and help, [mail us](mailto:centic@centic.es)"
     }
 )
 
 
-st.title('CENTIC FTW')
+st.title('CENTIC WTF')
 st.write("""Esta herramienta tiene la intención de facilitar el análisis de textos
         mediante técnicas de procesamiento del lenguaje natural.""")
 
@@ -77,6 +77,6 @@ for uploaded_file in uploaded_files:
 
     n_chars, n_words, n_unique_words, n_phrases = dp.extract_metrics(document)
     morpho_count = dp.morphological_metrics(document)
-    st.write(document)
+    st.write(document[:][0])
 
-    # show_metrics()
+    #show_metrics()
