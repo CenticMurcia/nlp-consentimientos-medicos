@@ -36,8 +36,8 @@ def extract_metrics(document):
     # General Metrics
 
     # - Number of sentences in text
-    words = [words for phrase in document for words in phrase]
-    metrics['total_phrases'] = len(document)
+    words = [words for sentence in document for words in sentence]
+    metrics['total_sentences'] = len(document)
 
     # -Number of chars in text
     #metrics['total_chars'] = sum([len(word['token']) for word in words])
