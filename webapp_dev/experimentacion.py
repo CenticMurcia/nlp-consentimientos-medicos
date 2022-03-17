@@ -2,7 +2,9 @@ import streamlit as st
 import altair as alt
 import data_processing as dp
 
+
 def show_metrics():
+    # FIXME Refactor this to work with new morpho_count
     st.header(f"Documento: {uploaded_file.name}")
     col1, col2, col3, col4 = st.columns(4)
 
@@ -39,44 +41,51 @@ def show_metrics():
 #### WEBAPP ####
 #--------------#
 
+
 # Browser title, favicon and about section
 st.set_page_config(
     page_title="NLP Processor",
     page_icon="📘",
     layout="wide",
     menu_items={
-        'About': "Developed by CENTIC. For bugs and help, [mail us](mailto:centic@centic.es)"
+        'About': '''Developed by CENTIC.
+                    For bugs and help, [mail us](mailto:centic@centic.es)'''
     }
 )
 
 
-st.title('CENTIC WTF')
-st.write("""Esta herramienta tiene la intención de facilitar el análisis de textos
+st.title(f'CENTIC WTF! :book: :tada:')
+st.write(f"""Esta herramienta tiene la intención de facilitar el análisis de textos
         mediante técnicas de procesamiento del lenguaje natural.""")
 
 col1, space, col2 = st.columns([1, 0.5, 3])
 # Language selection
 with col1:
-    slctd_lang = st.radio(
+    selected_lang = st.radio(
         "Seleccione el idioma de los ficheros de entrada",
         ('Español', 'Catalán'))
 with col2:
     uploaded_files = st.file_uploader(
-        label='Tus ficheros aquí',
+        label='Suba los ficheros en esta sección:',
         accept_multiple_files=True,
         type=['txt'])
 
 # Loop for every uploaded file
 for uploaded_file in uploaded_files:
-    string_data = dp.read_file(uploaded_file)
+    try:
+        string_data = dp.read_file(uploaded_file)
+    except UnicodeError:
+        st.error(f'''File **{uploaded_file.name}** is not
+                encoded in UTF-8 or Latin-1''')
+        continue
 
-    with st.spinner('Procesando texto en Freeling...'):
+    with st.spinner(f'''Procesando fichero **{uploaded_file.name}**
+                    con Freeling...'''):
         document = dp.freeling_processing(
-            document=string_data, language=slctd_lang)
-
+            document=string_data, language=selected_lang)
 
     n_chars, n_words, n_unique_words, n_phrases = dp.extract_metrics(document)
     morpho_count = dp.morphological_metrics(document)
-    st.write(document[:][0])
+    # st.write(document[:][0])
 
-    #show_metrics()
+    # show_metrics()
