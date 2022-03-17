@@ -20,34 +20,39 @@ def freeling_processing(document='4111_OR_ES.txt',
         language = 'cat'
     params = {'outf': 'tagged', 'format': 'json', 'lang': language}
     # Send request
-    i1 = perf_counter()
     url = "http://www.corpus.unam.mx/servicio-freeling/analyze.php"
     r = requests.post(url, files=files, params=params)
     # Response to json
     obj = r.json()
-    i2 = perf_counter()
-    print(f"Freeling time processing for document: {i2-i1:0.5f}")
 
     # Return morphological info
     return obj
 
 
-@st.cache(show_spinner=False)
+# @st.cache(show_spinner=False)
 def extract_metrics(document):
+    """Returns all the requested metrics for a text"""
+    metrics = {}
+    # General Metrics
+
+    # - Number of sentences in text
+    words = [words for phrase in document for words in phrase]
+    metrics['total_phrases'] = len(document)
 
     # -Number of chars in text
-    n_chars = sum([len(word['token'])
-                  for phrase in document for word in phrase])
+    #metrics['total_chars'] = sum([len(word['token']) for word in words])
+    metrics['total_chars'] = sum([len(word['token']) for word in words])
     # - Number of syllables on text
     # Nope
     # - Number of words in text (tokens)
-    n_words = len([word for phrase in document for word in phrase])
+    metrics['total_words'] = len(words)
     # - Number of words per types in text
-    n_unique_words = len(set([word['token']
-                         for phrase in document for word in phrase]))
-    # - Number of sentences in text
-    n_phrases = len([phrase for phrase in document])
-    return n_chars, n_words, n_unique_words, n_phrases
+    metrics['total_unique_words'] = len(set([word['token']
+                                             for word in words]))
+
+    # Morphological metrics
+    metrics = metrics | morphological_metrics(document)
+    return metrics
 
 
 def sum_words(index, char, iterator):
@@ -105,7 +110,6 @@ def count_adverbs(adverb_tags):
 
 def count_verbs(verb_tags):
     verbs = {}
-    # TODO Finish counting of verbs
     verbs['verbs_total'] = len(verb_tags)
     verbs['main_verbs'] = sum_words(1, 'M', verb_tags)
     verbs['auxiliary_verbs'] = sum_words(1, 'A', verb_tags)
@@ -152,9 +156,10 @@ def count_pronouns(pronoun_tags):
 
 def morphological_metrics(document):
     """Extracts the number of nouns, verbs, adjectives, etc"""
+    # For reference, check
+    # https://freeling-user-manual.readthedocs.io/en/latest/tagsets/tagset-es/
 
     # Get all tags
-    i1 = perf_counter()
     elements = [word for sentence in document for word in sentence]
     tags = list(map(lambda word: word['tag'], elements))
 
@@ -191,9 +196,6 @@ def morphological_metrics(document):
     morpho_count = (nouns | adjectives | conjuctions |
                     adverbs | verbs | determiners | pronouns)
 
-    i2 = perf_counter()
-    print(f"Tiempo de procesamiento morfologico: {i2-i1:0.6f}")
-    st.write(morpho_count)
     return morpho_count
 
 

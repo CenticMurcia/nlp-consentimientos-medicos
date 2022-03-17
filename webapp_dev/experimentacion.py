@@ -84,8 +84,9 @@ for uploaded_file in uploaded_files:
         document = dp.freeling_processing(
             document=string_data, language=selected_lang)
 
-    n_chars, n_words, n_unique_words, n_phrases = dp.extract_metrics(document)
-    morpho_count = dp.morphological_metrics(document)
+    metrics = dp.extract_metrics(document)
+    st.write(metrics)
+
     # st.write(document[:][0])
 
     # show_metrics()
