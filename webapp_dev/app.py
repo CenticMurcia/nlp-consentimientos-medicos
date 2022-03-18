@@ -1,9 +1,10 @@
 import streamlit as st
 import data_processing as dp
+import pandas as pd
+import altair as alt
 
 
 def show_metrics():
-    # FIXME Refactor this to work with new morpho_count
     with st.expander(f"Documento: {uploaded_file.name}"):
         col1, col2, col3, col4 = st.columns(4)
 
@@ -12,11 +13,11 @@ def show_metrics():
         col3.metric("Palabras únicas:", value=metrics['total_unique_words'])
         col4.metric("Oraciones:", value=metrics['total_sentences'])
         col1.metric("T. Rápido",
-                    value=str(round(metrics['read_fast_time'], 2)) + ' min')
+                    value=f"{round(metrics['read_fast_time'], 2)} min")
         col2.metric("T. Medio",
-                    value=str(round(metrics['read_medium_time'], 2)) + ' min')
+                    value=f"{round(metrics['read_medium_time'], 2)} min")
         col3.metric("T. Lento",
-                    value=str(round(metrics['read_slow_time'], 2)) + ' min')
+                    value=f"{round(metrics['read_slow_time'], 2)} min")
 
         # col1.metric("Sustantivos:", value=morpho_count['N'])
         # col2.metric("Sustantivos/Total:",
@@ -45,6 +46,9 @@ def show_metrics():
 
     # st.write(morpho_count)
 
+
+def plot_selection(argument):
+    pass
 
 # -------------- #
 # --- WEBAPP --- #
@@ -78,6 +82,7 @@ with file_uploader:
         accept_multiple_files=True,
         type=['txt'])
 
+documents = []
 # Loop for every uploaded file
 for uploaded_file in uploaded_files:
     try:
@@ -92,9 +97,36 @@ for uploaded_file in uploaded_files:
         document = dp.freeling_processing(
             document=string_data, language=selected_lang)
 
-    metrics = dp.extract_metrics(document)
+    documents.append(dp.extract_metrics(document, uploaded_file.name))
+
+if documents:
+    dataframe = pd.DataFrame.from_records(documents, index='name')
+    with st.expander('Dataframe de documentos'):
+        st.write(dataframe)
+
+    with st.expander('Gráficos'):
+        select_features = st.multiselect(
+            "Select Python packages to compare",
+            dataframe.columns,
+            default=[
+                "total_sentences",
+                "total_words",
+            ],
+            help='Seleccione las características que quiere visualizar',
+        )
+
+        selected_features = dataframe[select_features]
+
+        st.write(selected_features)
+
+        if not select_features:
+            st.stop()
+
+        # st.altair_chart(plot_selection(selected_features),
+        #                 use_container_width=True)
+
     # st.write(metrics)
 
     # st.write(document[:][0])
 
-    show_metrics()
+    # show_metrics()

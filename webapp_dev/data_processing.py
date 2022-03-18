@@ -5,8 +5,7 @@ import streamlit as st
 
 
 @st.cache(show_spinner=False)
-def freeling_processing(document='4111_OR_ES.txt',
-                        language='Español'):
+def freeling_processing(document='4111_OR_ES.txt', language='Español'):
     # File to send
     file = document
     files = {'file': file}
@@ -27,9 +26,9 @@ def freeling_processing(document='4111_OR_ES.txt',
 
 
 # @st.cache(show_spinner=False)
-def extract_metrics(document):
+def extract_metrics(document, name):
     """Returns all the requested metrics for a text"""
-    metrics = {}
+    metrics = {'name': name}
     # General Metrics
 
     # - Number of sentences in text
@@ -43,12 +42,20 @@ def extract_metrics(document):
     # - Number of words in text (tokens)
     metrics['total_words'] = len(words)
     # - Number of words per types in text
-    metrics['total_unique_words'] = len(set([word['token']
-                                             for word in words]))
+    metrics['total_unique_words'] = len(set([word['token'] for word in words]))
     # Time to read
     metrics['read_fast_time'] = metrics['total_words'] / 350
     metrics['read_medium_time'] = metrics['total_words'] / 250
     metrics['read_slow_time'] = metrics['total_words'] / 150
+
+    # Fernandez Huerta Index
+    metrics['fernandez_huerta'] = 206.84 - (0.6 * metrics['total_words']) - (
+            1.02 * metrics['total_sentences'])
+
+    # Comprehensibility index
+    metrics['comprehensibility_index'] = 95.2 - (
+            9.7 * metrics['total_chars'] / metrics['total_words']) - (
+            0.35 * metrics['total_words'] / metrics['total_sentences'])
 
     # Morphological metrics
     metrics = metrics | morphological_metrics(document)
@@ -63,8 +70,7 @@ def sum_words(index, char, iterator):
     char: string
     iterator: iterable
     """
-    return sum(1 for _ in
-               filter(lambda tag: tag[index] == char, iterator))
+    return sum(1 for _ in filter(lambda tag: tag[index] == char, iterator))
 
 
 def count_nouns(noun_tags):
@@ -129,12 +135,12 @@ def count_verbs(verb_tags):
 def count_determiners(determiner_tags):
     determiners = {'determiner_total': len(determiner_tags),
                    'articles_determiners': sum_words(1, 'A', determiner_tags),
-                   'demostrative_determiners': sum_words(
-                       1, 'D', determiner_tags),
+                   'demostrative_determiners': sum_words(1, 'D',
+                                                         determiner_tags),
                    'undefined_determiners': sum_words(1, 'I', determiner_tags),
                    'possesive_determiners': sum_words(1, 'P', determiner_tags),
-                   'interrogative_determiners': sum_words(
-                       1, 'T', determiner_tags),
+                   'interrogative_determiners': sum_words(1, 'T',
+                                                          determiner_tags),
                    'exclamative_determiners': sum_words(1, 'E',
                                                         determiner_tags)}
 
@@ -189,9 +195,8 @@ def morphological_metrics(document):
     # Pronouns
     pronouns = count_pronouns(pronoun_tags)
 
-    morpho_count = (nouns | adjectives | conjuctions |
-                    adverbs | verbs | determiners | pronouns)
-
+    morpho_count = {**nouns, **adjectives, **conjuctions, **adverbs, **verbs,
+                    **determiners, **pronouns}
     return morpho_count
 
 
@@ -201,7 +206,6 @@ def read_file(file):
         string_data = file.getvalue().decode('utf-8')
     except UnicodeDecodeError:
         print('File is not UTF-8. Trying with Latin-1...')
-
         try:
             string_data = file.getvalue().decode('latin-1')
         except UnicodeDecodeError:
@@ -210,5 +214,5 @@ def read_file(file):
     # Chars can be codified as 'a´' o 'á'
     # Freeling takes 'a´' as separated characters and
     # break words because of this
-    string_data = normalize("NFC", string_data)
+    # string_data = normalize("NFC", string_data)
     return string_data
