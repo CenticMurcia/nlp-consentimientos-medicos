@@ -3,3 +3,4 @@ cons_medicos/
 .DS_Store
 exp_exp.py
 *.pyc
+.idea
