@@ -47,8 +47,15 @@ def show_metrics():
     # st.write(morpho_count)
 
 
-def plot_selection(argument):
-    pass
+def plot_selection(dataframe):
+    graphic = (alt.Chart(dataframe).mark_circle(size=60).encode(
+        x=dataframe.columns[1],
+        y=dataframe.columns[2],
+        # color='Origin',
+        tooltip=['name', dataframe.columns[0], dataframe.columns[1]]
+    ).interactive())
+    return graphic
+
 
 # -------------- #
 # --- WEBAPP --- #
@@ -100,7 +107,7 @@ for uploaded_file in uploaded_files:
     documents.append(dp.extract_metrics(document, uploaded_file.name))
 
 if documents:
-    dataframe = pd.DataFrame.from_records(documents, index='name')
+    dataframe = pd.DataFrame.from_records(documents)
     with st.expander('Dataframe de documentos'):
         st.write(dataframe)
 
@@ -109,6 +116,7 @@ if documents:
             "Select Python packages to compare",
             dataframe.columns,
             default=[
+                "name",
                 "total_sentences",
                 "total_words",
             ],
@@ -122,9 +130,8 @@ if documents:
         if not select_features:
             st.stop()
 
-        # st.altair_chart(plot_selection(selected_features),
-        #                 use_container_width=True)
-
+        x = plot_selection(selected_features)
+        st.altair_chart(x)
     # st.write(metrics)
 
     # st.write(document[:][0])
