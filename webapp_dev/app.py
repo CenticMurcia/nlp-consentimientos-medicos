@@ -1,7 +1,8 @@
-import streamlit as st
-import data_processing as dp
-import pandas as pd
 import altair as alt
+import pandas as pd
+import streamlit as st
+
+import data_processing as dp
 
 
 def show_metrics():
@@ -49,8 +50,8 @@ def show_metrics():
 
 def plot_selection(dataframe):
     graphic = (alt.Chart(dataframe).mark_circle(size=60).encode(
-        x=dataframe.columns[1],
-        y=dataframe.columns[2],
+        x=dataframe.columns[0],
+        y=dataframe.columns[1],
         # color='Origin',
         tooltip=['name', dataframe.columns[0], dataframe.columns[1]]
     ).interactive())
@@ -108,26 +109,30 @@ for uploaded_file in uploaded_files:
 
 if documents:
     dataframe = pd.DataFrame.from_records(documents)
+    dataframe.set_index('name', drop=False, inplace=True)
+    options = list(dataframe.columns)
+    options.remove('name')
     with st.expander('Dataframe de documentos'):
         st.write(dataframe)
 
     with st.expander('Gráficos'):
         select_features = st.multiselect(
-            "Select Python packages to compare",
-            dataframe.columns,
+            "Seleccione las variables a comparar",
+            options,
             default=[
-                "name",
                 "total_sentences",
                 "total_words",
             ],
-            help='Seleccione las características que quiere visualizar',
+            help=(f'Seleccione las características que quiere visualizar.'
+                  f' Por ahora solo se soportan __2 variables simultáneas.__'),
         )
 
+        select_features.append('name')
         selected_features = dataframe[select_features]
 
-        st.write(selected_features)
+        st.write(selected_features.drop('name', axis=1))
 
-        if not select_features:
+        if not select_features or len(select_features) < 3:
             st.stop()
 
         x = plot_selection(selected_features)
