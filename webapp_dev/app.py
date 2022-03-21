@@ -48,13 +48,14 @@ def show_metrics():
     # st.write(morpho_count)
 
 
-def plot_selection(dataframe):
-    graphic = (alt.Chart(dataframe).mark_circle(size=60).encode(
-        x=dataframe.columns[0],
-        y=dataframe.columns[1],
+def plot_selection(data):
+    graphic = (alt.Chart(data).mark_circle(size=60).encode(
+        x=data.columns[0],
+        y=data.columns[1],
         # color='Origin',
-        tooltip=['name', dataframe.columns[0], dataframe.columns[1]]
-    ).interactive())
+        tooltip=['name', data.columns[0], data.columns[1]]
+    )
+               .interactive())
     return graphic
 
 
@@ -114,8 +115,8 @@ if documents:
     dataframe.set_index('name', drop=False, inplace=True)
     options = list(dataframe.columns)
     options.remove('name')
-    with st.expander('Dataframe de documentos'):
-        st.write(dataframe)
+    # with st.expander('Dataframe de documentos'):
+    #     st.write(dataframe)
 
     with st.expander('Gráficos'):
         select_features = st.multiselect(
@@ -129,16 +130,16 @@ if documents:
                   f' Por ahora solo se soportan __2 variables simultáneas.__'),
         )
 
-        select_features.append('name')
         selected_features = dataframe[select_features]
-
-        st.write(selected_features.drop('name', axis=1))
-
-        if not select_features or len(select_features) < 3:
-            st.stop()
-
-        x = plot_selection(selected_features)
-        st.altair_chart(x)
+        if not select_features:
+            st.dataframe(dataframe)
+        elif len(select_features) < 2:
+            st.write(selected_features)
+        else:
+            selected_features.reset_index(inplace=True)
+            st.write(selected_features)
+            x = plot_selection(selected_features)
+            st.altair_chart(x)
     # st.write(metrics)
 
     # st.write(document[:][0])
