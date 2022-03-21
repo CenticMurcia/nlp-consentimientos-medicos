@@ -74,9 +74,11 @@ st.set_page_config(
     }
 )
 
-st.title(f'CENTIC WTF! :book: :tada:')
-st.write(f"""Esta herramienta tiene la intención de facilitar el análisis de
-            textos mediante técnicas de procesamiento del lenguaje natural.""")
+st.title(f'Analizador morfosintactico')
+st.write(f"""Herramienta para el análisis de consentimientos médicos para la
+             determinación de su legibilidad y comprensibilidad desarrollada por
+             el Centro tecnológico de las Tecnologías de la Información y la
+             Comunicación de Murcia (CENTIC)""")
 
 lang, space, file_uploader = st.columns([1, 0.5, 3])
 # Language selection
