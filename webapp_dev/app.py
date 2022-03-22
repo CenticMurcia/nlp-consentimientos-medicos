@@ -5,7 +5,7 @@ import data_processing as dp
 
 
 def show_metrics():
-    with st.expander(f"Documento: {uploaded_file.name}"):
+    with st.expander(f"Documento: {uploaded_file.filename}"):
         col1, col2, col3, col4 = st.columns(4)
 
         col1.metric("Caracteres (sin espacios):", value=metrics['total_chars'])
@@ -75,58 +75,50 @@ with lang:
     selected_lang = st.radio(
         "Seleccione el idioma de los ficheros de entrada",
         ('Español', 'Catalán'))
+
 with file_uploader:
     uploaded_files = st.file_uploader(
         label='Suba los ficheros en esta sección:',
         accept_multiple_files=True,
         type=['txt'])
 
-freeling_processed_files = []
+freeling_results = []
 try:
-    freeling_processed_files = dp.requests_freeling_processing(
+    freeling_results = dp.freeling_processing(
         uploaded_files, selected_lang)
 except UnicodeError as exc:
     st.error(f'''{exc}''')
 
 documents_metrics = []
 
-if freeling_processed_files:
-    for morphological_analysis, name in freeling_processed_files:
+if freeling_results:
+    for morphological_analysis, filename in freeling_results:
         documents_metrics.append(dp.extract_metrics(morphological_analysis,
-                                                    name))
+                                                    filename))
 
 if documents_metrics:
     dataframe = pd.DataFrame.from_records(documents_metrics)
     dataframe.set_index('name', drop=False, inplace=True)
     options = list(dataframe.columns)
     options.remove('name')
-    # with st.expander('Dataframe de documentos'):
-    #     st.write(dataframe)
 
-    with st.expander('Gráficos'):
-        select_features = st.multiselect(
-            "Seleccione las variables a comparar",
-            options,
-            default=[
-                "total_sentences",
-                "total_words",
-            ],
-            help=(f'Seleccione las características que quiere visualizar.'
-                  f' Por ahora solo se soportan __2 variables simultáneas.__'),
-        )
+    selected_features = st.multiselect(
+        "Seleccione las variables a comparar",
+        options,
+        default=[
+            "total_sentences",
+            "total_words",
+        ],
+        help=(f'Seleccione las características que quiere visualizar.'
+              f' Por ahora solo se soportan __2 variables simultáneas.__'),
+    )
 
-    selected_features = dataframe[select_features]
-    if not select_features:
+    filtered_dataframe = dataframe[selected_features]
+    if not selected_features:
         st.dataframe(dataframe[options])
-    elif len(select_features) < 2:
-        st.write(selected_features)
+    elif len(selected_features) < 2:
+        st.write(filtered_dataframe)
     else:
-        selected_features.reset_index(inplace=True, drop=False)
-        st.write(selected_features.drop('name', axis=1))
-        x = dp.plot_selection(selected_features)
-        st.altair_chart(x)
-    # st.write(metrics)
-
-    # st.write(document[:][0])
-
-    # show_metrics()
+        filtered_dataframe.reset_index(inplace=True, drop=False)
+        st.write(filtered_dataframe.drop('name', axis=1))
+        st.altair_chart(dp.plot_selection(filtered_dataframe))

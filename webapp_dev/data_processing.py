@@ -5,7 +5,7 @@ import grequests as gr
 import streamlit as st
 
 
-def freeling_processing(document='4111_OR_ES.txt', language='Español'):
+def create_freeling_request(document='4111_OR_ES.txt', language='Español'):
     # File to send
     files = {'file': document}
     # Parameters
@@ -20,8 +20,9 @@ def freeling_processing(document='4111_OR_ES.txt', language='Español'):
     return r
 
 
-@st.cache(show_spinner=False)
+# @st.experimental_memo()
 def extract_metrics(document, name):
+    print(f"Extrayendo metricas de {name}")
     """Returns all the requested metrics for a text"""
     metrics = {'name': name}
     # General Metrics
@@ -214,7 +215,8 @@ def read_file(file):
     return string_data
 
 
-def requests_freeling_processing(files, selected_language='es'):
+@st.experimental_memo()
+def freeling_processing(files, selected_language='es'):
     """Recieves a collection of files and creates async requests to the
     freeling API. Returns a list of tuples with a json object containig the
     morphological analysis and the original name of file.
@@ -222,7 +224,6 @@ def requests_freeling_processing(files, selected_language='es'):
     :param files: a collection of texts
     :param selected_language: language in which process the text (es, cat)
     """
-
     names = []
     requests = []
     for uploaded_file in files:
@@ -232,8 +233,8 @@ def requests_freeling_processing(files, selected_language='es'):
             raise UnicodeError(f'''File **{uploaded_file.name}** is not
                     encoded in UTF-8 or Latin-1''')
 
-        request = freeling_processing(document=string_data,
-                                      language=selected_language)
+        request = create_freeling_request(document=string_data,
+                                          language=selected_language)
 
         names.append(uploaded_file.name)
         requests.append(request)
@@ -253,7 +254,7 @@ def plot_selection(data):
         # color='Origin',
         tooltip=['name', data.columns[1], data.columns[2]]
     ).mark_point(opacity=0.5,
-                 color='orange',
+                 color='green',
                  filled=True
                  ).interactive())
     return graphic
