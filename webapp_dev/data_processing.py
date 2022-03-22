@@ -22,7 +22,6 @@ def create_freeling_request(document='4111_OR_ES.txt', language='Español'):
 
 # @st.experimental_memo()
 def extract_metrics(document, name):
-    print(f"Extrayendo metricas de {name}")
     """Returns all the requested metrics for a text"""
     metrics = {'name': name}
     # General Metrics
