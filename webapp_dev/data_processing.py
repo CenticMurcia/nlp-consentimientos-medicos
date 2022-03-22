@@ -1,10 +1,7 @@
-from unicodedata import normalize
-
-import requests
-import streamlit as st
+import grequests as gr
 
 
-@st.cache(show_spinner=False)
+# @st.cache(show_spinner=False)
 def freeling_processing(document='4111_OR_ES.txt', language='Español'):
     # File to send
     file = document
@@ -14,15 +11,12 @@ def freeling_processing(document='4111_OR_ES.txt', language='Español'):
         language = 'es'
     else:
         language = 'cat'
-    params = {'outf': 'tagged', 'format': 'json', 'lang': language}
+    params = {'outf': 'tagged', 'format': 'json', 'lang':
+        language}
     # Send request
     url = "http://www.corpus.unam.mx/servicio-freeling/analyze.php"
-    r = requests.post(url, files=files, params=params)
-    # Response to json
-    obj = r.json()
-
-    # Return morphological info
-    return obj
+    r = gr.post(url, files=files, params=params)
+    return r
 
 
 # @st.cache(show_spinner=False)
@@ -55,7 +49,8 @@ def extract_metrics(document, name):
     # Comprehensibility index
     metrics['comprehensibility_index'] = 95.2 - (
             9.7 * metrics['total_chars'] / metrics['total_words']) - (
-            0.35 * metrics['total_words'] / metrics['total_sentences'])
+                                                 0.35 * metrics['total_words'] /
+                                                 metrics['total_sentences'])
 
     # Morphological metrics
     metrics = metrics | morphological_metrics(document)

@@ -1,6 +1,9 @@
+
 import altair as alt
-import pandas as pd
 import streamlit as st
+import json
+
+import pandas as pd
 
 import data_processing as dp
 
@@ -50,10 +53,10 @@ def show_metrics():
 
 def plot_selection(data):
     graphic = (alt.Chart(data).mark_circle(size=60).encode(
-        x=data.columns[0],
-        y=data.columns[1],
+        x=data.columns[1],
+        y=data.columns[2],
         # color='Origin',
-        tooltip=['name', data.columns[0], data.columns[1]]
+        tooltip=['name', data.columns[1], data.columns[2]]
     )
                .interactive())
     return graphic
@@ -93,7 +96,8 @@ with file_uploader:
         accept_multiple_files=True,
         type=['txt'])
 
-documents = []
+requests = []
+names = []
 # Loop for every uploaded file
 for uploaded_file in uploaded_files:
     try:
@@ -105,10 +109,18 @@ for uploaded_file in uploaded_files:
 
     with st.spinner(f'''Procesando fichero **{uploaded_file.name}**
                     con Freeling...'''):
-        document = dp.freeling_processing(
+        request = dp.freeling_processing(
             document=string_data, language=selected_lang)
 
-    documents.append(dp.extract_metrics(document, uploaded_file.name))
+    names.append(uploaded_file.name)
+    requests.append(request)
+
+results = dp.gr.map(requests)
+
+documents = []
+for element, name in zip(results, names):
+    element = json.loads(element.text)
+    documents.append(dp.extract_metrics(element, name))
 
 if documents:
     dataframe = pd.DataFrame.from_records(documents)
@@ -130,16 +142,16 @@ if documents:
                   f' Por ahora solo se soportan __2 variables simultáneas.__'),
         )
 
-        selected_features = dataframe[select_features]
-        if not select_features:
-            st.dataframe(dataframe)
-        elif len(select_features) < 2:
-            st.write(selected_features)
-        else:
-            selected_features.reset_index(inplace=True)
-            st.write(selected_features)
-            x = plot_selection(selected_features)
-            st.altair_chart(x)
+    selected_features = dataframe[select_features]
+    if not select_features:
+        st.dataframe(dataframe)
+    elif len(select_features) < 2:
+        st.write(selected_features)
+    else:
+        selected_features.reset_index(inplace=True)
+    st.write(selected_features)
+    x = plot_selection(selected_features)
+    st.altair_chart(x)
     # st.write(metrics)
 
     # st.write(document[:][0])
