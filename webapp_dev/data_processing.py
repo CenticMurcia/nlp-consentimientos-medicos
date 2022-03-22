@@ -1,25 +1,26 @@
+import json
+
+import altair as alt
 import grequests as gr
+import streamlit as st
 
 
-# @st.cache(show_spinner=False)
 def freeling_processing(document='4111_OR_ES.txt', language='Español'):
     # File to send
-    file = document
-    files = {'file': file}
+    files = {'file': document}
     # Parameters
     if language == 'Español':
         language = 'es'
     else:
         language = 'cat'
-    params = {'outf': 'tagged', 'format': 'json', 'lang':
-        language}
+    params = {'outf': 'tagged', 'format': 'json', 'lang': language}
     # Send request
     url = "http://www.corpus.unam.mx/servicio-freeling/analyze.php"
     r = gr.post(url, files=files, params=params)
     return r
 
 
-# @st.cache(show_spinner=False)
+@st.cache(show_spinner=False)
 def extract_metrics(document, name):
     """Returns all the requested metrics for a text"""
     metrics = {'name': name}
@@ -211,3 +212,48 @@ def read_file(file):
     # break words because of this
     # string_data = normalize("NFC", string_data)
     return string_data
+
+
+def requests_freeling_processing(files, selected_language='es'):
+    """Recieves a collection of files and creates async requests to the
+    freeling API. Returns a list of tuples with a json object containig the
+    morphological analysis and the original name of file.
+
+    :param files: a collection of texts
+    :param selected_language: language in which process the text (es, cat)
+    """
+
+    names = []
+    requests = []
+    for uploaded_file in files:
+        try:
+            string_data = read_file(uploaded_file)
+        except UnicodeError:
+            raise UnicodeError(f'''File **{uploaded_file.name}** is not
+                    encoded in UTF-8 or Latin-1''')
+
+        request = freeling_processing(document=string_data,
+                                      language=selected_language)
+
+        names.append(uploaded_file.name)
+        requests.append(request)
+
+    # Collection containing an object for every file the
+    # morphological_analysis. Transforming it to a json...
+    morphological_analysis = gr.map(requests)
+    morphological_jsons = [json.loads(element.text) for element in
+                           morphological_analysis]
+    return zip(morphological_jsons, names)
+
+
+def plot_selection(data):
+    graphic = (alt.Chart(data).mark_circle(size=60).encode(
+        x=data.columns[1],
+        y=data.columns[2],
+        # color='Origin',
+        tooltip=['name', data.columns[1], data.columns[2]]
+    ).mark_point(opacity=0.5,
+                 color='orange',
+                 filled=True
+                 ).interactive())
+    return graphic

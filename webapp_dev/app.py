@@ -1,9 +1,5 @@
-
-import altair as alt
-import streamlit as st
-import json
-
 import pandas as pd
+import streamlit as st
 
 import data_processing as dp
 
@@ -51,17 +47,6 @@ def show_metrics():
     # st.write(morpho_count)
 
 
-def plot_selection(data):
-    graphic = (alt.Chart(data).mark_circle(size=60).encode(
-        x=data.columns[1],
-        y=data.columns[2],
-        # color='Origin',
-        tooltip=['name', data.columns[1], data.columns[2]]
-    )
-               .interactive())
-    return graphic
-
-
 # -------------- #
 # --- WEBAPP --- #
 # -------------- #
@@ -78,11 +63,11 @@ st.set_page_config(
     }
 )
 
-st.title(f'Analizador morfosintactico')
+st.title(f'Analizador morfosintáctico')
 st.write(f"""Herramienta para el análisis de consentimientos médicos para la
              determinación de su legibilidad y comprensibilidad desarrollada por
              el Centro tecnológico de las Tecnologías de la Información y la
-             Comunicación de Murcia (CENTIC)""")
+             Comunicación de Murcia (CENTIC).""")
 
 lang, space, file_uploader = st.columns([1, 0.5, 3])
 # Language selection
@@ -96,34 +81,22 @@ with file_uploader:
         accept_multiple_files=True,
         type=['txt'])
 
-requests = []
-names = []
-# Loop for every uploaded file
-for uploaded_file in uploaded_files:
-    try:
-        string_data = dp.read_file(uploaded_file)
-    except UnicodeError:
-        st.error(f'''File **{uploaded_file.name}** is not
-                encoded in UTF-8 or Latin-1''')
-        continue
+freeling_processed_files = []
+try:
+    freeling_processed_files = dp.requests_freeling_processing(
+        uploaded_files, selected_lang)
+except UnicodeError as exc:
+    st.error(f'''{exc}''')
 
-    with st.spinner(f'''Procesando fichero **{uploaded_file.name}**
-                    con Freeling...'''):
-        request = dp.freeling_processing(
-            document=string_data, language=selected_lang)
+documents_metrics = []
 
-    names.append(uploaded_file.name)
-    requests.append(request)
+if freeling_processed_files:
+    for morphological_analysis, name in freeling_processed_files:
+        documents_metrics.append(dp.extract_metrics(morphological_analysis,
+                                                    name))
 
-results = dp.gr.map(requests)
-
-documents = []
-for element, name in zip(results, names):
-    element = json.loads(element.text)
-    documents.append(dp.extract_metrics(element, name))
-
-if documents:
-    dataframe = pd.DataFrame.from_records(documents)
+if documents_metrics:
+    dataframe = pd.DataFrame.from_records(documents_metrics)
     dataframe.set_index('name', drop=False, inplace=True)
     options = list(dataframe.columns)
     options.remove('name')
@@ -144,14 +117,14 @@ if documents:
 
     selected_features = dataframe[select_features]
     if not select_features:
-        st.dataframe(dataframe)
+        st.dataframe(dataframe[options])
     elif len(select_features) < 2:
         st.write(selected_features)
     else:
-        selected_features.reset_index(inplace=True)
-    st.write(selected_features)
-    x = plot_selection(selected_features)
-    st.altair_chart(x)
+        selected_features.reset_index(inplace=True, drop=False)
+        st.write(selected_features.drop('name', axis=1))
+        x = dp.plot_selection(selected_features)
+        st.altair_chart(x)
     # st.write(metrics)
 
     # st.write(document[:][0])
