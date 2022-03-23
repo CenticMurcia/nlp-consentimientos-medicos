@@ -113,12 +113,12 @@ if documents_metrics:
               f' Por ahora solo se soportan __2 variables simultáneas.__'),
     )
 
-    filtered_dataframe = dataframe[selected_features]
+    filtered_dataframe = dataframe[selected_features].copy()
     if not selected_features:
         st.dataframe(dataframe[options])
     elif len(selected_features) < 2:
         st.write(filtered_dataframe)
     else:
-        filtered_dataframe.reset_index(inplace=True, drop=False)
+        filtered_dataframe['name'] = filtered_dataframe.index
         st.write(filtered_dataframe.drop('name', axis=1))
         st.altair_chart(dp.plot_selection(filtered_dataframe))

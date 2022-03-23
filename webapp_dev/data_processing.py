@@ -247,13 +247,12 @@ def freeling_processing(files, selected_language='es'):
 
 
 def plot_selection(data):
-    graphic = (alt.Chart(data).mark_circle(size=60).encode(
-        x=data.columns[1],
-        y=data.columns[2],
-        # color='Origin',
+    graphic = (alt.Chart(data).encode(
+        x=data.columns[0],
+        y=data.columns[1],
         tooltip=['name', data.columns[1], data.columns[2]]
-    ).mark_point(opacity=0.5,
-                 color='green',
-                 filled=True
-                 ).interactive())
+    ).mark_circle(opacity=0.5,
+                  size=50,
+                  color='red',
+                  ).interactive())
     return graphic
