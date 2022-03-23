@@ -125,7 +125,4 @@ if documents_metrics:
         st.download_button('Descargar .csv',
                            data=df_to_show.to_csv().encode('utf-8'),
                            file_name='dataframe.csv')
-        st.download_button('Descargar .excel',
-                           data=df_to_show.to_excel('out.xlsx'),
-                           file_name='dataframe.xlsx')
         st.altair_chart(dp.plot_selection(filtered_dataframe))
