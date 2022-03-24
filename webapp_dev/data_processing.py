@@ -3,6 +3,7 @@ import json
 import altair as alt
 import grequests as gr
 import streamlit as st
+import legibilidad
 
 
 def create_freeling_request(document='4111_OR_ES.txt', language='Español'):
@@ -21,14 +22,14 @@ def create_freeling_request(document='4111_OR_ES.txt', language='Español'):
 
 
 # @st.experimental_memo()
-def extract_metrics(document, name):
+def extract_metrics(freeling, text, filename):
     """Returns all the requested metrics for a text"""
-    metrics = {'name': name}
+    metrics = {'name': filename}
     # General Metrics
 
     # - Number of sentences in text
-    words = [words for sentence in document for words in sentence]
-    metrics['total_sentences'] = len(document)
+    words = [words for sentence in freeling for words in sentence]
+    metrics['total_sentences'] = len(freeling)
 
     # -Number of chars in text
     metrics['total_chars'] = sum([len(word['token']) for word in words])
@@ -44,17 +45,13 @@ def extract_metrics(document, name):
     metrics['read_slow_time'] = metrics['total_words'] / 150
 
     # Fernandez Huerta Index
-    metrics['fernandez_huerta'] = 206.84 - (0.6 * metrics['total_words']) - (
-            1.02 * metrics['total_sentences'])
+    metrics['fernandez_huerta'] = legibilidad.fernandez_huerta(text)
 
     # Comprehensibility index
-    metrics['comprehensibility_index'] = 95.2 - (
-            9.7 * metrics['total_chars'] / metrics['total_words']) - (
-                                                 0.35 * metrics['total_words'] /
-                                                 metrics['total_sentences'])
+    metrics['gutierrez'] = legibilidad.gutierrez(text)
 
     # Morphological metrics
-    metrics = metrics | morphological_metrics(document)
+    metrics = metrics | morphological_metrics(freeling)
     return metrics
 
 
@@ -225,6 +222,7 @@ def freeling_processing(files, selected_language='es'):
     """
     names = []
     requests = []
+    strings = []
     for uploaded_file in files:
         try:
             string_data = read_file(uploaded_file)
@@ -235,6 +233,7 @@ def freeling_processing(files, selected_language='es'):
         request = create_freeling_request(document=string_data,
                                           language=selected_language)
 
+        strings.append(string_data)
         names.append(uploaded_file.name)
         requests.append(request)
 
@@ -243,7 +242,7 @@ def freeling_processing(files, selected_language='es'):
     morphological_analysis = gr.map(requests)
     morphological_jsons = [json.loads(element.text) for element in
                            morphological_analysis]
-    return zip(morphological_jsons, names)
+    return zip(morphological_jsons, strings, names)
 
 
 def plot_selection(data):
