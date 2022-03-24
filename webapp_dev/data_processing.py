@@ -34,7 +34,7 @@ def extract_metrics(freeling, text, filename):
     # -Number of chars in text
     metrics['total_chars'] = sum([len(word['token']) for word in words])
     # - Number of syllables on text
-    # Nope
+    metrics['total_syllables'] = legibilidad.count_all_syllables(text)
     # - Number of words in text (tokens)
     metrics['total_words'] = len(words)
     # - Number of words per types in text
