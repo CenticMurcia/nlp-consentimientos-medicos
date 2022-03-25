@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 
 import data_processing as dp
+import pca
 
 
 def show_metrics():
@@ -113,7 +114,6 @@ if documents_metrics:
               f' Por ahora solo se soportan __2 variables simultáneas.__'),
     )
 
-    # graphic, pca = st.columns([1, 1])
     if not selected_features:
         df_show = dataframe[options]
     else:
@@ -124,10 +124,16 @@ if documents_metrics:
                        data=df_show.to_csv().encode('utf-8'),
                        file_name='dataframe.csv')
 
+    graphic, pca_view = st.columns([1, 1])
     # Plot if enough features selected
     if len(selected_features) >= 2:
-        df_show['name'] = df_show.index
-        st.altair_chart(dp.plot_selection(df_show))
+        with graphic:
+            df_show['name'] = df_show.index
+            st.altair_chart(dp.plot_selection(df_show))
 
+    with pca_view:
+        pca = pca.process_pca(dataframe[options])
+        st.dataframe(pca)
+        # st.altair_chart(dp.plot_selection(pca))
 else:
     st.stop()
