@@ -113,16 +113,21 @@ if documents_metrics:
               f' Por ahora solo se soportan __2 variables simultáneas.__'),
     )
 
-    filtered_dataframe = dataframe[selected_features].copy()
+    # graphic, pca = st.columns([1, 1])
     if not selected_features:
-        st.dataframe(dataframe[options])
-    elif len(selected_features) < 2:
-        st.write(filtered_dataframe)
+        df_show = dataframe[options]
     else:
-        filtered_dataframe['name'] = filtered_dataframe.index
-        df_to_show = filtered_dataframe.drop('name', axis=1)
-        st.write(df_to_show)
-        st.download_button('Descargar .csv',
-                           data=df_to_show.to_csv().encode('utf-8'),
-                           file_name='dataframe.csv')
-        st.altair_chart(dp.plot_selection(filtered_dataframe))
+        df_show = dataframe[selected_features].copy()
+
+    st.dataframe(df_show)
+    st.download_button('Descargar .csv',
+                       data=df_show.to_csv().encode('utf-8'),
+                       file_name='dataframe.csv')
+
+    # Plot if enough features selected
+    if len(selected_features) >= 2:
+        df_show['name'] = df_show.index
+        st.altair_chart(dp.plot_selection(df_show))
+
+else:
+    st.stop()

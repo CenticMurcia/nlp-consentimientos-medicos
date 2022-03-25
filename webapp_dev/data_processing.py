@@ -249,7 +249,7 @@ def plot_selection(data):
     graphic = (alt.Chart(data).encode(
         x=data.columns[0],
         y=data.columns[1],
-        tooltip=['name', data.columns[1], data.columns[2]]
+        tooltip=['name', data.columns[0], data.columns[1]]
     ).mark_circle(opacity=0.5,
                   size=50,
                   color='red',
