@@ -134,6 +134,6 @@ if documents_metrics:
     with pca_view:
         pca = pca.process_pca(dataframe[options])
         st.dataframe(pca)
-        # st.altair_chart(dp.plot_selection(pca))
+        st.altair_chart(dp.plot_pca(pca))
 else:
     st.stop()

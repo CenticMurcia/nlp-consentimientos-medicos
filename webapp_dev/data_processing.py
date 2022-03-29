@@ -21,7 +21,6 @@ def create_freeling_request(document='4111_OR_ES.txt', language='Español'):
     return r
 
 
-# @st.experimental_memo()
 def extract_metrics(freeling, text, filename):
     """Returns all the requested metrics for a text"""
     metrics = {'name': filename}
@@ -250,6 +249,19 @@ def plot_selection(data):
         x=data.columns[0],
         y=data.columns[1],
         tooltip=['name', data.columns[0], data.columns[1]]
+    ).mark_circle(opacity=0.5,
+                  size=50,
+                  color='red',
+                  ).interactive())
+    return graphic
+
+
+def plot_pca(data):
+    data.reset_index(level=0, inplace=True, drop=False)
+    graphic = (alt.Chart(data).encode(
+        x=data.columns[1],
+        y=data.columns[2],
+        tooltip=['name', data.columns[1], data.columns[2]]
     ).mark_circle(opacity=0.5,
                   size=50,
                   color='red',
