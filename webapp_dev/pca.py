@@ -13,5 +13,4 @@ def process_pca(dataframe):
     dataframe = dataframe.reset_index(level=0)
     pca_df = pd.concat([pca_df, dataframe['name']], axis=1)
     pca_df.set_index('name', inplace=True)
-    print(pca_df)
     return pca_df

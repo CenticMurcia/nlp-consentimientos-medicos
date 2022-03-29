@@ -94,7 +94,8 @@ documents_metrics = []
 
 if freeling_results:
     for morphological_analysis, text, filename in freeling_results:
-        documents_metrics.append(dp.extract_metrics(morphological_analysis, text,
+        documents_metrics.append(dp.extract_metrics(morphological_analysis,
+                                                    text,
                                                     filename))
 
 if documents_metrics:

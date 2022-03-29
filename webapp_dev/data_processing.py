@@ -21,6 +21,7 @@ def create_freeling_request(document='4111_OR_ES.txt', language='Español'):
     return r
 
 
+@st.experimental_memo
 def extract_metrics(freeling, text, filename):
     """Returns all the requested metrics for a text"""
     metrics = {'name': filename}
@@ -210,7 +211,7 @@ def read_file(file):
     return string_data
 
 
-@st.experimental_memo()
+@st.experimental_memo(show_spinner=True)
 def freeling_processing(files, selected_language='es'):
     """Recieves a collection of files and creates async requests to the
     freeling API. Returns a list of tuples with a json object containig the
