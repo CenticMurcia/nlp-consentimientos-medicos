@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-import data_processing as dp
+import data_processing
 import pca
 
 
@@ -85,7 +85,7 @@ with file_uploader:
 
 freeling_results = []
 try:
-    freeling_results = dp.freeling_processing(
+    freeling_results = data_processing.freeling_processing(
         uploaded_files, selected_lang)
 except UnicodeError as exc:
     st.error(f'''{exc}''')
@@ -94,9 +94,9 @@ documents_metrics = []
 
 if freeling_results:
     for morphological_analysis, text, filename in freeling_results:
-        documents_metrics.append(dp.extract_metrics(morphological_analysis,
-                                                    text,
-                                                    filename))
+        documents_metrics.append(data_processing.extract_metrics(morphological_analysis,
+                                                                 text,
+                                                                 filename))
 
 if documents_metrics:
     dataframe = pd.DataFrame.from_records(documents_metrics)
@@ -130,11 +130,11 @@ if documents_metrics:
     if len(selected_features) >= 2:
         with graphic:
             df_show['name'] = df_show.index
-            st.altair_chart(dp.plot_selection(df_show))
+            st.altair_chart(data_processing.plot_selection(df_show))
 
     with pca_view:
         pca = pca.process_pca(dataframe[options])
         st.dataframe(pca)
-        st.altair_chart(dp.plot_pca(pca))
+        st.altair_chart(data_processing.plot_pca(pca))
 else:
     st.stop()
