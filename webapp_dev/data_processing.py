@@ -7,9 +7,6 @@ import streamlit as st
 
 import legibilidad
 
-with open('./login_config.json', 'r') as f:
-    login = json.load(f)
-
 
 def create_freeling_request(document='4111_OR_ES.txt', language='es'):
     if language == 'Español':
@@ -17,8 +14,8 @@ def create_freeling_request(document='4111_OR_ES.txt', language='es'):
     else:
         language = 'ca'
 
-    request_data = {'username': login['user'],
-                    'password': login['passwd'],
+    request_data = {'username': st.secrets['api_username'],
+                    'password': st.secrets['api_passwd'],
                     'text_input': document,
                     'language': language,
                     'output': 'json',
