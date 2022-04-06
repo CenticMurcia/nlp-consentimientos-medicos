@@ -40,13 +40,13 @@ def extract_metrics(freeling, text, filename):
     metrics['total_sentences'] = len(freeling)
 
     # -Number of chars in text
-    metrics['total_chars'] = sum([len(word['token']) for word in words])
+    metrics['total_chars'] = sum([len(word['form']) for word in words])
     # - Number of syllables on text
     metrics['total_syllables'] = legibilidad.count_all_syllables(text)
     # - Number of words in text (tokens)
     metrics['total_words'] = len(words)
     # - Number of words per types in text
-    metrics['total_unique_words'] = len(set([word['token'] for word in words]))
+    metrics['total_unique_words'] = len(set([word['form'] for word in words]))
     # Time to read
     metrics['read_fast_time'] = metrics['total_words'] / 350
     metrics['read_medium_time'] = metrics['total_words'] / 250
@@ -220,16 +220,14 @@ def read_file(file):
 
 
 def clean_json(json_file):
-    final = []
+    append_sentences = []
     for paragraph in json_file['paragraphs']:
-        append_sentences = []
         for sentence in paragraph['sentences']:
             append_sentences.append(sentence['tokens'])
-        final.append(append_sentences)
-    # print(len(json_file['paragraphs'][0]['sentences'][0]['tokens']))
+    return append_sentences
 
 
-# @st.experimental_memo(show_spinner=True)
+@st.experimental_memo(show_spinner=True)
 def freeling_processing(files, selected_language='es'):
     """Recieves a collection of files and creates async requests to the
     freeling API. Returns a list of tuples with a json object containig the
@@ -258,12 +256,9 @@ def freeling_processing(files, selected_language='es'):
     # Collection containing an object for every file the
     # morphological_analysis. Transforming it to a json...
     morphological_analysis = gr.map(requests)
-    for element in morphological_analysis:
-        print(element)
-    morphological_jsons = [json.loads(element.text) for element in
+    morphological_jsons = [clean_json(json.loads(element.text)) for element in
                            morphological_analysis]
-    clean_json(morphological_jsons[0])
-    # return zip(morphological_jsons, strings, names)
+    return zip(morphological_jsons, strings, names)
 
 
 def plot_selection(data):
