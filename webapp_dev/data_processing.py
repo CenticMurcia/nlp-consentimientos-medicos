@@ -1,23 +1,31 @@
 import json
+import unicodedata
 
 import altair as alt
 import grequests as gr
 import streamlit as st
+
 import legibilidad
 
+with open('./login_config.json', 'r') as f:
+    login = json.load(f)
 
-def create_freeling_request(document='4111_OR_ES.txt', language='Español'):
-    # File to send
-    files = {'file': document}
-    # Parameters
+
+def create_freeling_request(document='4111_OR_ES.txt', language='es'):
     if language == 'Español':
         language = 'es'
     else:
-        language = 'cat'
-    params = {'outf': 'tagged', 'format': 'json', 'lang': language}
-    # Send request
-    url = "http://www.corpus.unam.mx/servicio-freeling/analyze.php"
-    r = gr.post(url, files=files, params=params)
+        language = 'ca'
+
+    request_data = {'username': login['user'],
+                    'password': login['passwd'],
+                    'text_input': document,
+                    'language': language,
+                    'output': 'json',
+                    'interactive': '1'}
+
+    url = 'http://frodo.lsi.upc.edu:8080/TextWS/textservlet/ws/processQuery/morpho'
+    r = gr.post(url, files=request_data)
     return r
 
 
@@ -207,11 +215,21 @@ def read_file(file):
     # Chars can be codified as 'a´' o 'á'
     # Freeling takes 'a´' as separated characters and
     # break words because of this
-    # string_data = normalize("NFC", string_data)
+    string_data = unicodedata.normalize("NFC", string_data)
     return string_data
 
 
-@st.experimental_memo(show_spinner=True)
+def clean_json(json_file):
+    final_dict = {}
+
+    append_sentences = []
+    for sentence in json_file['paragraphs'][0]['sentences']:
+        append_sentences.extend(sentence['tokens'])
+    print(append_sentences)
+    print(len(json_file['paragraphs'][0]['sentences'][0]['tokens']))
+
+
+# @st.experimental_memo(show_spinner=True)
 def freeling_processing(files, selected_language='es'):
     """Recieves a collection of files and creates async requests to the
     freeling API. Returns a list of tuples with a json object containig the
@@ -240,9 +258,12 @@ def freeling_processing(files, selected_language='es'):
     # Collection containing an object for every file the
     # morphological_analysis. Transforming it to a json...
     morphological_analysis = gr.map(requests)
+    for element in morphological_analysis:
+        print(element)
     morphological_jsons = [json.loads(element.text) for element in
                            morphological_analysis]
-    return zip(morphological_jsons, strings, names)
+    clean_json(morphological_jsons[0])
+    # return zip(morphological_jsons, strings, names)
 
 
 def plot_selection(data):

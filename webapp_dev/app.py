@@ -94,9 +94,10 @@ documents_metrics = []
 
 if freeling_results:
     for morphological_analysis, text, filename in freeling_results:
-        documents_metrics.append(data_processing.extract_metrics(morphological_analysis,
-                                                                 text,
-                                                                 filename))
+        documents_metrics.append(
+            data_processing.extract_metrics(morphological_analysis,
+                                            text,
+                                            filename))
 
 if documents_metrics:
     dataframe = pd.DataFrame.from_records(documents_metrics)
