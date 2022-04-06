@@ -76,7 +76,7 @@ with lang:
     selected_lang = st.selectbox(
         "Seleccione el idioma de los ficheros de entrada",
         ('Español', 'Catalán', 'Inglés', 'Portugués', 'Francés', 'Alemán'),
-        index=1)
+        index=0)
 
 with file_uploader:
     uploaded_files = st.file_uploader(
