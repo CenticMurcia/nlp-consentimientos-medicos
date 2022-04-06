@@ -220,13 +220,13 @@ def read_file(file):
 
 
 def clean_json(json_file):
-    final_dict = {}
-
-    append_sentences = []
-    for sentence in json_file['paragraphs'][0]['sentences']:
-        append_sentences.extend(sentence['tokens'])
-    print(append_sentences)
-    print(len(json_file['paragraphs'][0]['sentences'][0]['tokens']))
+    final = []
+    for paragraph in json_file['paragraphs']:
+        append_sentences = []
+        for sentence in paragraph['sentences']:
+            append_sentences.append(sentence['tokens'])
+        final.append(append_sentences)
+    # print(len(json_file['paragraphs'][0]['sentences'][0]['tokens']))
 
 
 # @st.experimental_memo(show_spinner=True)
