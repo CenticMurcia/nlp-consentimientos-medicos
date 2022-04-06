@@ -8,8 +8,8 @@ def process_pca(dataframe):
     pca = PCA(n_components=2)
     principal_components = pca.fit_transform(x)
     pca_df = pd.DataFrame(data=principal_components,
-                          columns=['principal component 1',
-                                   'principal component 2'])
+                          columns=['Componente principal 1',
+                                   'Componente principal 2'])
     dataframe = dataframe.reset_index(level=0)
     pca_df = pd.concat([pca_df, dataframe['name']], axis=1)
     pca_df.set_index('name', inplace=True)

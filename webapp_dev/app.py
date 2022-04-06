@@ -128,15 +128,21 @@ if documents_metrics:
                        file_name='dataframe.csv')
 
     graphic, pca_view = st.columns([1, 1])
-    # Plot if enough features selected
-    if len(selected_features) >= 2:
-        with graphic:
-            df_show['name'] = df_show.index
-            st.altair_chart(data_processing.plot_selection(df_show))
-
-    with pca_view:
-        pca = pca.process_pca(dataframe[options])
-        st.dataframe(pca)
-        st.altair_chart(data_processing.plot_pca(pca))
+    # Plot if enough selected features and files
+    if df_show.shape[0] > 1:
+        with pca_view:
+            pca = pca.process_pca(dataframe[options])
+            st.dataframe(pca)
+            st.download_button('Descargar .csv',
+                               data=pca.to_csv().encode('utf-8'),
+                               file_name='pca.csv')
+            st.altair_chart(data_processing.plot_pca(pca))
+        if len(selected_features) >= 2:
+            with graphic:
+                df_show['name'] = df_show.index
+                st.altair_chart(data_processing.plot_selection(df_show))
+    else:
+        st.write(f"Necesitas al menos 2 ficheros y 2 variables a comparar para"
+                 f"mostrar la representación gráfica y el PCA.")
 else:
     st.stop()
