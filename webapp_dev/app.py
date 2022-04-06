@@ -73,9 +73,10 @@ st.write(f"""Herramienta para el análisis de consentimientos médicos para la
 lang, space, file_uploader = st.columns([1, 0.5, 3])
 # Language selection
 with lang:
-    selected_lang = st.radio(
+    selected_lang = st.selectbox(
         "Seleccione el idioma de los ficheros de entrada",
-        ('Español', 'Catalán'))
+        ('Español', 'Catalán', 'Inglés', 'Portugués', 'Francés', 'Alemán'),
+        index=1)
 
 with file_uploader:
     uploaded_files = st.file_uploader(

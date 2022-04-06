@@ -11,6 +11,14 @@ import legibilidad
 def create_freeling_request(document='4111_OR_ES.txt', language='es'):
     if language == 'Español':
         language = 'es'
+    elif language == 'Inglés':
+        language = 'en'
+    elif language == 'Francés':
+        language = 'fr'
+    elif language == 'Alemán':
+        language = 'de'
+    elif language == 'Portugués':
+        language = 'pt'
     else:
         language = 'ca'
 
