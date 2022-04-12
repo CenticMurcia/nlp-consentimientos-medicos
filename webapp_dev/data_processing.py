@@ -8,7 +8,9 @@ import streamlit as st
 import legibilidad
 
 
+@st.experimental_memo(show_spinner=False)
 def create_freeling_request(document='4111_OR_ES.txt', language='es'):
+    print(f"Cache miss -> create_freeling_requests()")
     if language == 'Español':
         language = 'es'
     elif language == 'Inglés':
@@ -34,8 +36,9 @@ def create_freeling_request(document='4111_OR_ES.txt', language='es'):
     return r
 
 
-@st.experimental_memo
+@st.experimental_memo(show_spinner=False)
 def extract_metrics(freeling, text, filename):
+    print(f"Cache miss -> extract_metrics()")
     """Returns all the requested metrics for a text"""
     metrics = {'name': filename}
     # General Metrics
@@ -211,7 +214,6 @@ def read_file(file):
     try:
         string_data = file.getvalue().decode('utf-8')
     except UnicodeDecodeError:
-        print('File is not UTF-8. Trying with Latin-1...')
         try:
             string_data = file.getvalue().decode('latin-1')
         except UnicodeDecodeError:
@@ -225,15 +227,13 @@ def read_file(file):
 
 
 def clean_json(json_file):
-    append_sentences = []
-    for paragraph in json_file['paragraphs']:
-        for sentence in paragraph['sentences']:
-            append_sentences.append(sentence['tokens'])
-    return append_sentences
+    return [sentence['tokens'] for paragraph in json_file['paragraphs'] for
+            sentence in paragraph['sentences']]
 
 
-@st.experimental_memo(show_spinner=True)
+@st.experimental_memo(show_spinner=False, )
 def freeling_processing(files, selected_language='es'):
+    print(f"Cache miss -> freeling_processing()")
     """Recieves a collection of files and creates async requests to the
     freeling API. Returns a list of tuples with a json object containig the
     morphological analysis and the original name of file.
@@ -260,9 +260,10 @@ def freeling_processing(files, selected_language='es'):
 
     # Collection containing an object for every file the
     # morphological_analysis. Transforming it to a json...
-    morphological_analysis = gr.map(requests)
-    morphological_jsons = [clean_json(json.loads(element.text)) for element in
-                           morphological_analysis]
+    with st.spinner('Procesando ficheros en freeling...'):
+        morphological_analysis = gr.map(requests)
+        morphological_jsons = [clean_json(json.loads(element.text)) for element
+                               in morphological_analysis]
     return zip(morphological_jsons, strings, names)
 
 
@@ -288,4 +289,14 @@ def plot_pca(data):
                   size=50,
                   color='red',
                   ).interactive())
+    return graphic
+
+
+def plot_components(data, component: int = 1):
+    data = data[data['index'] == f'Componente {component}']
+    graphic = (alt.Chart(data).mark_bar(color='red', opacity=0.5).encode(
+        x='value',
+        y=alt.Y('variable', sort='-x'),
+        tooltip=['value']
+    ).interactive())
     return graphic

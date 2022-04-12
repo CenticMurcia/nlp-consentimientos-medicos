@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 
 import data_processing
-import pca
+import machine_learning
 
 
 def show_metrics():
@@ -127,20 +127,38 @@ if documents_metrics:
                        data=df_show.to_csv().encode('utf-8'),
                        file_name='dataframe.csv')
 
-    graphic, pca_view = st.columns([1, 1])
     # Plot if enough selected features and files
+    if len(selected_features) > 1:
+        df_show['name'] = df_show.index
+        st.altair_chart(data_processing.plot_selection(df_show))
     if df_show.shape[0] > 1:
-        with pca_view:
-            pca = pca.process_pca(dataframe[options])
-            st.dataframe(pca)
+        st.header('Análisis de componentes principales')
+        pca, components = machine_learning.get_pca(dataframe[options])
+
+        pca_col, components_col = st.columns([1, 2])
+        with pca_col:
+            st.subheader('Clúster de componentes principales')
+            st.dataframe(pca, height=200)
             st.download_button('Descargar .csv',
                                data=pca.to_csv().encode('utf-8'),
                                file_name='pca.csv')
             st.altair_chart(data_processing.plot_pca(pca))
-        if len(selected_features) >= 2:
-            with graphic:
-                df_show['name'] = df_show.index
-                st.altair_chart(data_processing.plot_selection(df_show))
+
+        with components_col:
+            st.subheader(f'Peso de cada característica en cada '
+                         f'componente principal')
+            st.dataframe(components)
+            st.download_button('Descargar .csv',
+                               data=components.to_csv().encode('utf-8'),
+                               file_name='pca.csv')
+            selected_component = st.selectbox(
+                "Seleccione la componente a desglosar",
+                range(1, len(components['index'].unique()) + 1),
+                index=0)
+            st.altair_chart(
+                data_processing.plot_components(components,
+                                                selected_component))
+
     else:
         st.write(f"Necesitas al menos 2 ficheros y 2 variables a comparar para"
                  f"mostrar la representación gráfica y el PCA.")
