@@ -55,7 +55,7 @@ def show_metrics():
 
 # Browser title, favicon and about section
 st.set_page_config(
-    page_title="NLP Processor",
+    page_title="Natural Language Processor",
     page_icon="📘",
     layout="wide",
     menu_items={
