@@ -133,31 +133,34 @@ if documents_metrics:
         st.altair_chart(data_processing.plot_selection(df_show))
     if df_show.shape[0] > 1:
         st.header('Análisis de componentes principales')
-        pca, components = machine_learning.get_pca(dataframe[options])
+        with st.expander(""):
+            pca, components = machine_learning.get_pca(dataframe[options])
 
-        pca_col, components_col = st.columns([1, 2])
-        with pca_col:
-            st.subheader('Clúster de componentes principales')
-            st.dataframe(pca, height=200)
-            st.download_button('Descargar .csv',
-                               data=pca.to_csv().encode('utf-8'),
-                               file_name='pca.csv')
-            st.altair_chart(data_processing.plot_pca(pca))
+            pca_col, space, components_col = st.columns([10,1,10])
+            with pca_col:
+                st.subheader('Clúster de componentes principales')
+                st.dataframe(pca, height=200)
+                st.download_button('Descargar .csv',
+                                   data=pca.to_csv().encode('utf-8'),
+                                   file_name='pca.csv')
+                st.altair_chart(data_processing.plot_pca(pca),
+                                use_container_width=True)
 
-        with components_col:
-            st.subheader(f'Peso de cada característica en cada '
-                         f'componente principal')
-            st.dataframe(components)
-            st.download_button('Descargar .csv',
-                               data=components.to_csv().encode('utf-8'),
-                               file_name='pca.csv')
-            selected_component = st.selectbox(
-                "Seleccione la componente a desglosar",
-                range(1, len(components['index'].unique()) + 1),
-                index=0)
-            st.altair_chart(
-                data_processing.plot_components(components,
-                                                selected_component))
+            with components_col:
+                st.subheader(f'Peso de cada característica en cada '
+                             f'componente principal')
+                st.dataframe(components, height=200)
+                st.download_button('Descargar .csv',
+                                   data=components.to_csv().encode('utf-8'),
+                                   file_name='pca.csv')
+                selected_component = st.selectbox(
+                    "Seleccione la componente a desglosar",
+                    range(1, len(components['index'].unique()) + 1),
+                    index=0)
+                st.altair_chart(
+                    data_processing.plot_components(components,
+                                                    selected_component),
+                    use_container_width=True)
 
     else:
         st.write(f"Necesitas al menos 2 ficheros y 2 variables a comparar para"
