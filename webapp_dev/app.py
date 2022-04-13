@@ -85,11 +85,14 @@ with file_uploader:
         type=['txt'])
 
 freeling_results = []
-try:
-    freeling_results = data_processing.freeling_processing(
-        uploaded_files, selected_lang)
-except UnicodeError as exc:
-    st.error(f'''{exc}''')
+if uploaded_files:
+    try:
+        freeling_results = data_processing.freeling_processing(
+            uploaded_files, selected_lang)
+    except UnicodeError as exc:
+        st.error(f'{exc}')
+    except Exception as exc:
+        st.error(f'{exc}')
 
 documents_metrics = []
 
@@ -134,6 +137,7 @@ if documents_metrics:
     if df_show.shape[0] > 1:
         st.header('Análisis de componentes principales')
         with st.expander(""):
+            tsne = machine_learning.process_tsne(dataframe[options])
             pca, components = machine_learning.get_pca(dataframe[options])
 
             pca_col, space, components_col = st.columns([10,1,10])

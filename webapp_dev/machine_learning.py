@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler
 
 
@@ -30,3 +31,8 @@ def get_pca(dataframe):
     pca_df.set_index('name', inplace=True)
 
     return pca_df, components_df
+
+
+def process_tsne(dataframe):
+    x = StandardScaler().fit_transform(dataframe.values)
+    tsne = TSNE(n_components=2, learning_rate='auto').fit_transform(x)
