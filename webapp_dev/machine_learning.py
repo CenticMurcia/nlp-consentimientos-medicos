@@ -20,6 +20,7 @@ def get_pca(dataframe):
                                      components) + 1)])
     components_df.reset_index(inplace=True)
     components_df = components_df.melt(id_vars=['index'])
+    print(components_df.head())
     components_df.sort_values(by=['index', 'value'], inplace=True,
                               ascending=[True, False])
 
@@ -35,4 +36,5 @@ def get_pca(dataframe):
 
 def process_tsne(dataframe):
     x = StandardScaler().fit_transform(dataframe.values)
-    tsne = TSNE(n_components=2, learning_rate='auto').fit_transform(x)
+    tsne = TSNE(n_components=2, learning_rate='auto',
+                init='pca').fit_transform(x)

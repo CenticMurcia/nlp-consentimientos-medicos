@@ -8,7 +8,7 @@ import streamlit as st
 import legibilidad
 
 
-@st.experimental_memo(show_spinner=False, ttl=60*60)
+@st.experimental_memo(show_spinner=False, ttl=60*60*3)
 def create_freeling_request(document='4111_OR_ES.txt', language='es'):
     print(f"Cache miss -> create_freeling_requests()")
     if language == 'Español':
@@ -32,7 +32,7 @@ def create_freeling_request(document='4111_OR_ES.txt', language='es'):
                     'interactive': '1'}
 
     url = 'http://frodo.lsi.upc.edu:8080/TextWS/textservlet/ws/processQuery/morpho'
-    r = gr.post(url, files=request_data, timeout=10)
+    r = gr.post(url, files=request_data)
     return r
 
 
@@ -231,7 +231,7 @@ def clean_json(json_file):
             sentence in paragraph['sentences']]
 
 
-@st.experimental_memo(show_spinner=False, ttl=60*60)
+@st.experimental_memo(show_spinner=False, ttl=60*60*3)
 def freeling_processing(files, selected_language='es'):
     print(f"Cache miss -> freeling_processing()")
     """Recieves a collection of files and creates async requests to the
@@ -261,12 +261,13 @@ def freeling_processing(files, selected_language='es'):
     # Collection containing an object for every file the
     # morphological_analysis. Transforming it to a json...
     with st.spinner('Procesando ficheros en freeling...'):
-        morphological_analysis = gr.imap(requests)
+        morphological_analysis = gr.map(requests)
         for e in morphological_analysis:
             if 500 <= e.status_code <= 600:
                 raise Exception(f'El servidor de Freeling no está disponible '
                                 f'en este momento. No es posible procesar '
-                                f'los ficheros. Inténtelo de nuevo más tarde.')
+                                f'los ficheros. Inténtelo de nuevo más tarde. '
+                                f'Error {e.status_code}')
 
         morphological_jsons = [clean_json(json.loads(element.text)) for element
                                in morphological_analysis]
