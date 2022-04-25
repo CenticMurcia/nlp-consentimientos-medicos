@@ -139,7 +139,7 @@ if documents_metrics:
         tsne = machine_learning.process_tsne(dataframe[options])
         pca, components = machine_learning.get_pca(dataframe[options])
 
-        pca_col, space, components_col = st.columns([10,1,10])
+        pca_col, space, components_col = st.columns([10, 1, 10])
         with pca_col:
             st.subheader('Clúster de componentes principales')
             st.dataframe(pca, height=200)
@@ -147,7 +147,7 @@ if documents_metrics:
                                data=pca.to_csv().encode('utf-8'),
                                file_name='pca.csv')
             st.altair_chart(data_processing.plot_pca(pca),
-                            use_container_width=True)
+                            use_container_width=False)
 
         with components_col:
             st.subheader(f'Peso de cada característica en cada '
@@ -158,12 +158,15 @@ if documents_metrics:
                                file_name='pca.csv')
             selected_component = st.selectbox(
                 "Seleccione la componente a desglosar",
-                range(1, len(components['index'].unique()) + 1),
+                range(1, len(components.columns) + 1),
                 index=0)
             st.altair_chart(
                 data_processing.plot_components(components,
                                                 selected_component),
                 use_container_width=True)
+
+        st.subheader('TSNE')
+        st.altair_chart(data_processing.plot_pca(tsne))
 
     else:
         st.write(f"Necesitas al menos 2 ficheros y 2 variables a comparar para"

@@ -1,15 +1,17 @@
 import json
+import time
 import unicodedata
 
 import altair as alt
-import grequests as gr
+import grequests
+import requests
 import streamlit as st
 
 import legibilidad
 
 
-@st.experimental_memo(show_spinner=False, ttl=60*60*3)
-def create_freeling_request(document='4111_OR_ES.txt', language='es'):
+def create_freeling_request(document='4111_OR_ES.txt', language='es',
+                            batch=False):
     print(f"Cache miss -> create_freeling_requests()")
     if language == 'Español':
         language = 'es'
@@ -32,7 +34,10 @@ def create_freeling_request(document='4111_OR_ES.txt', language='es'):
                     'interactive': '1'}
 
     url = 'http://frodo.lsi.upc.edu:8080/TextWS/textservlet/ws/processQuery/morpho'
-    r = gr.post(url, files=request_data)
+    if batch:
+        r = grequests.post(url, files=request_data)
+    else:
+        r = requests.post(url, files=request_data, timeout=15)
     return r
 
 
@@ -231,7 +236,7 @@ def clean_json(json_file):
             sentence in paragraph['sentences']]
 
 
-@st.experimental_memo(show_spinner=False, ttl=60*60*3)
+@st.experimental_memo(show_spinner=False, ttl=60 * 60 * 3)
 def freeling_processing(files, selected_language='es'):
     print(f"Cache miss -> freeling_processing()")
     """Recieves a collection of files and creates async requests to the
@@ -242,8 +247,10 @@ def freeling_processing(files, selected_language='es'):
     :param selected_language: language in which process the text (es, cat)
     """
     names = []
-    requests = []
+    requests_list = []
     strings = []
+    server_not_up = True
+    retries = 0
     for uploaded_file in files:
         try:
             string_data = read_file(uploaded_file)
@@ -251,23 +258,34 @@ def freeling_processing(files, selected_language='es'):
             raise UnicodeError(f'''File **{uploaded_file.name}** is not
                     encoded in UTF-8 or Latin-1''')
 
-        request = create_freeling_request(document=string_data,
-                                          language=selected_language)
+        with st.spinner('Conectando al servidor freeling...'):
+            if server_not_up:
+                while server_not_up and retries < 5:
+                    request = create_freeling_request(document=string_data,
+                                                      language=selected_language)
+                    if 500 <= request.status_code <= 600:
+                        retries += 1
+                        time.sleep(15)
+                    else:
+                        server_not_up = False
 
+                if server_not_up:
+                    raise Exception(
+                        f'El servidor de Freeling no está disponible '
+                        f'en este momento. No es posible procesar '
+                        f'los ficheros. Inténtelo de nuevo más tarde.')
+
+        request = create_freeling_request(document=string_data,
+                                          language=selected_language,
+                                          batch=True)
         strings.append(string_data)
         names.append(uploaded_file.name)
-        requests.append(request)
+        requests_list.append(request)
 
     # Collection containing an object for every file the
     # morphological_analysis. Transforming it to a json...
     with st.spinner('Procesando ficheros en freeling...'):
-        morphological_analysis = gr.map(requests)
-        for e in morphological_analysis:
-            if 500 <= e.status_code <= 600:
-                raise Exception(f'El servidor de Freeling no está disponible '
-                                f'en este momento. No es posible procesar '
-                                f'los ficheros. Inténtelo de nuevo más tarde. '
-                                f'Error {e.status_code}')
+        morphological_analysis = grequests.map(requests_list)
 
         morphological_jsons = [clean_json(json.loads(element.text)) for element
                                in morphological_analysis]
@@ -300,6 +318,11 @@ def plot_pca(data):
 
 
 def plot_components(data, component: int = 1):
+    data = data.transpose()
+    data.reset_index(inplace=True)
+    data = data.melt(id_vars=['index'])
+    data.sort_values(by=['index', 'value'], inplace=True,
+                     ascending=[True, False])
     data = data[data['index'] == f'Componente {component}']
     graphic = (alt.Chart(data).mark_bar(color='red', opacity=0.5).encode(
         x='value',
