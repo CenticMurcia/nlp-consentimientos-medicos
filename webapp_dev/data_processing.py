@@ -7,25 +7,32 @@ import grequests
 import requests
 import streamlit as st
 
+import logging
 import legibilidad
+
+logging.basicConfig(format='%(levelname)s %(asctime)s %(message)s')
+
+
+def transform_language(language):
+    if language == 'Español':
+        return 'es'
+    elif language == 'Inglés':
+        return 'en'
+    elif language == 'Francés':
+        return 'fr'
+    elif language == 'Alemán':
+        return 'de'
+    elif language == 'Portugués':
+        return 'pt'
+    else:
+        return 'ca'
 
 
 def create_freeling_request(document='4111_OR_ES.txt', language='es',
                             batch=False):
-    print(f"Cache miss -> create_freeling_requests()")
-    if language == 'Español':
-        language = 'es'
-    elif language == 'Inglés':
-        language = 'en'
-    elif language == 'Francés':
-        language = 'fr'
-    elif language == 'Alemán':
-        language = 'de'
-    elif language == 'Portugués':
-        language = 'pt'
-    else:
-        language = 'ca'
+    logging.info(f"Cache miss -> create_freeling_requests()")
 
+    language = transform_language(language)
     request_data = {'username': st.secrets['api_username'],
                     'password': st.secrets['api_passwd'],
                     'text_input': document,
@@ -37,13 +44,13 @@ def create_freeling_request(document='4111_OR_ES.txt', language='es',
     if batch:
         r = grequests.post(url, files=request_data)
     else:
-        r = requests.post(url, files=request_data, timeout=15)
+        r = requests.post(url, files=request_data)
     return r
 
 
 @st.experimental_memo(show_spinner=False)
 def extract_metrics(freeling, text, filename):
-    print(f"Cache miss -> extract_metrics()")
+    logging.info(f"Cache miss -> extract_metrics()")
     """Returns all the requested metrics for a text"""
     metrics = {'name': filename}
     # General Metrics
@@ -238,7 +245,7 @@ def clean_json(json_file):
 
 @st.experimental_memo(show_spinner=False, ttl=60 * 60 * 3)
 def freeling_processing(files, selected_language='es'):
-    print(f"Cache miss -> freeling_processing()")
+    logging.info(f"Cache miss -> freeling_processing()")
     """Recieves a collection of files and creates async requests to the
     freeling API. Returns a list of tuples with a json object containig the
     morphological analysis and the original name of file.
@@ -285,7 +292,7 @@ def freeling_processing(files, selected_language='es'):
     # Collection containing an object for every file the
     # morphological_analysis. Transforming it to a json...
     with st.spinner('Procesando ficheros en freeling...'):
-        morphological_analysis = grequests.map(requests_list)
+        morphological_analysis = grequests.map(requests_list, size=10)
 
         morphological_jsons = [clean_json(json.loads(element.text)) for element
                                in morphological_analysis]
@@ -325,8 +332,8 @@ def plot_components(data, component: int = 1):
                      ascending=[True, False])
     data = data[data['index'] == f'Componente {component}']
     graphic = (alt.Chart(data).mark_bar(color='red', opacity=0.5).encode(
-        x='value',
-        y=alt.Y('variable', sort='-x'),
+        x=alt.X('value', title='Valor'),
+        y=alt.Y('variable', sort='-x', title='Variable'),
         tooltip=['value']
     ).interactive())
     return graphic
