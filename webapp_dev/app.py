@@ -4,50 +4,6 @@ import streamlit as st
 import data_processing
 import machine_learning
 
-
-def show_metrics():
-    with st.expander(f"Documento: {uploaded_file.filename}"):
-        col1, col2, col3, col4 = st.columns(4)
-
-        col1.metric("Caracteres (sin espacios):", value=metrics['total_chars'])
-        col2.metric("Palabras:", value=metrics['total_words'])
-        col3.metric("Palabras únicas:", value=metrics['total_unique_words'])
-        col4.metric("Oraciones:", value=metrics['total_sentences'])
-        col1.metric("T. Rápido",
-                    value=f"{round(metrics['read_fast_time'], 2)} min")
-        col2.metric("T. Medio",
-                    value=f"{round(metrics['read_medium_time'], 2)} min")
-        col3.metric("T. Lento",
-                    value=f"{round(metrics['read_slow_time'], 2)} min")
-
-        # col1.metric("Sustantivos:", value=morpho_count['N'])
-        # col2.metric("Sustantivos/Total:",
-        #             value=str(round(morpho_count['N']/n_words, 4)*100) + "%")
-        # col1.metric("Adjetivos:", value=morpho_count['A'])
-        # col2.metric("Adjetivos/Total:",
-        # value=round(morpho_count['A']/n_words, 3))
-        # col1.metric("Conjunciones:", value=morpho_count['C'])
-        # col2.metric("Conjunciones/Total:",
-        #             value=round(morpho_count['C']/n_words, 3))
-        # col1.metric("Adverbios:", value=morpho_count['R'])
-        # col2.metric("Adverbios/Total:",
-        # value=round(morpho_count['R']/n_words, 3))
-        # col1.metric("Verbos:", value=morpho_count['V'])
-        # col2.metric("Verbos/Total:",
-        # value=round(morpho_count['V']/n_words, 3))
-        # col1.metric("Determinantes:", value=morpho_count['D'])
-        # col2.metric("Determinantes/Total:",
-        #             value=round(morpho_count['D']/n_words, 3))
-        # col1.metric("Preposiciones:", value=morpho_count['P'])
-        # col2.metric("Preposiciones/Total:",
-        #             value=round(morpho_count['P']/n_words, 3))
-        # col1.metric("Puntuación:", value=morpho_count['F'])
-        # col2.metric("Puntuación/Total:",
-        # value=round(morpho_count['F']/n_words, 3))
-
-    # st.write(morpho_count)
-
-
 # -------------- #
 # --- WEBAPP --- #
 # -------------- #
@@ -78,6 +34,7 @@ with lang:
         ('Español', 'Catalán', 'Inglés', 'Portugués', 'Francés', 'Alemán'),
         index=0)
 
+# Files
 with file_uploader:
     uploaded_files = st.file_uploader(
         label='Suba los ficheros en esta sección:',
@@ -97,12 +54,13 @@ if uploaded_files:
 documents_metrics = []
 
 if freeling_results:
-    with st.spinner(f'Extracting metrics...'):
-        for morphological_analysis, text, filename in freeling_results:
-            documents_metrics.append(
-                data_processing.extract_metrics(morphological_analysis,
-                                                text,
-                                                filename))
+    with st.spinner(f'Extrayendo métricas...'):
+        documents_metrics = [
+            data_processing.extract_metrics(morphological_analysis,
+                                            text,
+                                            filename,
+                                            selected_lang) for
+            morphological_analysis, text, filename in freeling_results]
 
 if documents_metrics:
     dataframe = pd.DataFrame.from_records(documents_metrics)

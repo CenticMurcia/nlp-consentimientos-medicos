@@ -1,4 +1,4 @@
-import json
+import logging
 import time
 import unicodedata
 
@@ -6,8 +6,8 @@ import altair as alt
 import grequests
 import requests
 import streamlit as st
+import specialized_language
 
-import logging
 import legibilidad
 
 logging.basicConfig(format='%(levelname)s %(asctime)s %(message)s')
@@ -28,13 +28,13 @@ def transform_language(language):
         return 'ca'
 
 
-def create_freeling_request(document='4111_OR_ES.txt', language='es',
-                            batch=False):
+def create_freeling_request(document, filename, language='es', batch=False):
     logging.info(f"Cache miss -> create_freeling_requests()")
 
     language = transform_language(language)
     request_data = {'username': st.secrets['api_username'],
                     'password': st.secrets['api_passwd'],
+                    'filename': filename,
                     'text_input': document,
                     'language': language,
                     'output': 'json',
@@ -49,7 +49,7 @@ def create_freeling_request(document='4111_OR_ES.txt', language='es',
 
 
 @st.experimental_memo(show_spinner=False)
-def extract_metrics(freeling, text, filename):
+def extract_metrics(freeling, text, filename, selected_lang):
     logging.info(f"Cache miss -> extract_metrics()")
     """Returns all the requested metrics for a text"""
     metrics = {'name': filename}
@@ -77,6 +77,12 @@ def extract_metrics(freeling, text, filename):
 
     # Comprehensibility index
     metrics['gutierrez'] = legibilidad.gutierrez(text)
+
+    # Specialized language
+    spec_lang = specialized_language.SpecialicedLanguage(transform_language(
+        selected_lang))
+    metrics['count_legal_language'] = spec_lang.count_legal_language(text)
+    metrics['count_medical_language'] = spec_lang.count_medical_language(text)
 
     # Morphological metrics
     metrics = metrics | morphological_metrics(freeling)
@@ -265,14 +271,16 @@ def freeling_processing(files, selected_language='es'):
             raise UnicodeError(f'''File **{uploaded_file.name}** is not
                     encoded in UTF-8 or Latin-1''')
 
-        with st.spinner('Conectando al servidor freeling...'):
+        with st.spinner('Conectando al servidor freeling. Esto podría '
+                        'tardar unos segundos...'):
             if server_not_up:
                 while server_not_up and retries < 5:
                     request = create_freeling_request(document=string_data,
+                                                      filename=uploaded_file.name,
                                                       language=selected_language)
-                    if 500 <= request.status_code <= 600:
+                    if not request.ok:
                         retries += 1
-                        time.sleep(15)
+                        time.sleep(20)
                     else:
                         server_not_up = False
 
@@ -283,6 +291,7 @@ def freeling_processing(files, selected_language='es'):
                         f'los ficheros. Inténtelo de nuevo más tarde.')
 
         request = create_freeling_request(document=string_data,
+                                          filename=uploaded_file.name,
                                           language=selected_language,
                                           batch=True)
         strings.append(string_data)
@@ -292,9 +301,8 @@ def freeling_processing(files, selected_language='es'):
     # Collection containing an object for every file the
     # morphological_analysis. Transforming it to a json...
     with st.spinner('Procesando ficheros en freeling...'):
-        morphological_analysis = grequests.map(requests_list, size=10)
-
-        morphological_jsons = [clean_json(json.loads(element.text)) for element
+        morphological_analysis = grequests.imap(requests_list, size=10)
+        morphological_jsons = [clean_json(element.json()) for element
                                in morphological_analysis]
     return zip(morphological_jsons, strings, names)
 
