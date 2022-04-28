@@ -26,6 +26,7 @@ st.write(f"""Herramienta para el análisis de consentimientos médicos para la
              el Centro tecnológico de las Tecnologías de la Información y la
              Comunicación de Murcia (CENTIC).""")
 
+# Language selection and file uploader columns
 lang, space, file_uploader = st.columns([1, 0.5, 3])
 # Language selection
 with lang:
@@ -41,36 +42,39 @@ with file_uploader:
         accept_multiple_files=True,
         type=['txt'])
 
+# Process the uploaded files on the freeling server
 freeling_results = []
 if uploaded_files:
     try:
-        freeling_results = data_processing.freeling_processing(
-            uploaded_files, selected_lang)
+        freeling_results = list(data_processing.freeling_processing(
+            uploaded_files, selected_lang))
     except UnicodeError as exc:
         st.error(f'{exc}')
     except Exception as exc:
         st.error(f'{exc}')
 
+# Metrics extraction
 documents_metrics = []
-
 if freeling_results:
-    with st.spinner(f'Extrayendo métricas...'):
-        documents_metrics = [
-            data_processing.extract_metrics(morphological_analysis,
-                                            text,
-                                            filename,
-                                            selected_lang) for
-            morphological_analysis, text, filename in freeling_results]
+    with st.spinner('Extrayendo métricas...'):
+        bar = st.progress(0)
+        for count, (morphological_analysis, text, filename) in enumerate(
+                freeling_results):
+            documents_metrics.append(
+                data_processing.extract_metrics(morphological_analysis,
+                                                text,
+                                                filename,
+                                                selected_lang))
+            bar.progress((count + 1) / len(freeling_results))
+        bar.empty()
 
+# SHOW PROCESSING RESULTS
 if documents_metrics:
-    dataframe = pd.DataFrame.from_records(documents_metrics)
-    dataframe.set_index('name', drop=False, inplace=True)
-    options = list(dataframe.columns)
-    options.remove('name')
+    dataframe = pd.DataFrame.from_records(documents_metrics, index='name')
 
     selected_features = st.multiselect(
         "Seleccione las variables a comparar",
-        options,
+        list(dataframe.columns),
         default=[
             "total_sentences",
             "total_words",
@@ -79,10 +83,10 @@ if documents_metrics:
               f' Por ahora solo se soportan __2 variables simultáneas.__'),
     )
 
-    if not selected_features:
-        df_show = dataframe[options]
-    else:
+    if selected_features:
         df_show = dataframe[selected_features].copy()
+    else:
+        df_show = dataframe
 
     st.dataframe(df_show)
     st.download_button('Descargar .csv',
@@ -95,8 +99,8 @@ if documents_metrics:
         st.altair_chart(data_processing.plot_selection(df_show))
     if df_show.shape[0] > 1:
         st.header('Análisis de componentes principales')
-        tsne = machine_learning.process_tsne(dataframe[options])
-        pca, components = machine_learning.get_pca(dataframe[options])
+        tsne = machine_learning.process_tsne(dataframe)
+        pca, components = machine_learning.get_pca(dataframe)
 
         pca_col, space, components_col = st.columns([10, 1, 10])
         with pca_col:
@@ -105,23 +109,23 @@ if documents_metrics:
             st.download_button('Descargar .csv',
                                data=pca.to_csv().encode('utf-8'),
                                file_name='pca.csv')
-            st.altair_chart(data_processing.plot_pca(pca),
-                            use_container_width=False)
+            st.altair_chart(data_processing.plot_pca(pca))
 
         with components_col:
             st.subheader(f'Peso de cada característica en cada '
                          f'componente principal')
+
             st.dataframe(components, height=200)
             st.download_button('Descargar .csv',
                                data=components.to_csv().encode('utf-8'),
                                file_name='pca.csv')
+
             selected_component = st.selectbox(
                 "Seleccione la componente a desglosar",
                 range(1, len(components.columns) + 1),
                 index=0)
             st.altair_chart(
-                data_processing.plot_components(components,
-                                                selected_component),
+                data_processing.plot_components(components, selected_component),
                 use_container_width=True)
 
         st.subheader('TSNE')

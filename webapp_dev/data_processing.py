@@ -6,9 +6,9 @@ import altair as alt
 import grequests
 import requests
 import streamlit as st
-import specialized_language
 
 import legibilidad
+import specialized_language
 
 logging.basicConfig(format='%(levelname)s %(asctime)s %(message)s')
 
@@ -249,7 +249,8 @@ def clean_json(json_file):
             sentence in paragraph['sentences']]
 
 
-@st.experimental_memo(show_spinner=False, ttl=60 * 60 * 3)
+@st.experimental_memo(show_spinner=False, ttl=60 * 60 * 3,
+                      suppress_st_warning=True)
 def freeling_processing(files, selected_language='es'):
     logging.info(f"Cache miss -> freeling_processing()")
     """Recieves a collection of files and creates async requests to the
