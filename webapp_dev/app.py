@@ -124,7 +124,7 @@ if not dataframe.empty:
             dp.plot_pca(machine_learning.process_tsne(dataframe)))
 
     else:
-        st.write(f"Necesitas al menos 2 ficheros y 2 variables a comparar para"
+        st.write(f"Necesitas al menos 2 ficheros y 2 variables a comparar para "
                  f"mostrar la representación gráfica y el PCA.")
 else:
     st.stop()

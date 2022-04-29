@@ -36,19 +36,21 @@ def extract_metrics(freeling_results, selected_lang):
             # General Metrics
 
             # - Number of sentences in text
-            words = [words for sentence in morphological_analysis for words in
-                     sentence]
+            words = legibilidad.count_words(text)
+            print(morphological_analysis)
             metrics['total_sentences'] = len(morphological_analysis)
 
-            # -Number of chars in text
-            metrics['total_chars'] = sum([len(word['form']) for word in words])
+            # -Number of letters in text
+            metrics['total_letters'] = legibilidad.count_letters(text)
             # - Number of syllables on text
             metrics['total_syllables'] = legibilidad.count_all_syllables(text)
             # - Number of words in text (tokens)
-            metrics['total_words'] = len(words)
+            metrics['total_words'] = words
             # - Number of words per types in text
-            metrics['total_unique_words'] = len(
-                set([word['form'] for word in words]))
+            metrics['total_unique_words'] = len(set([word for word
+                                                    in text.split() if
+                                                    word.isalpha() or
+                                                    word.isnumeric()]))
             # Time to read
             metrics['read_fast_time'] = metrics['total_words'] / 350
             metrics['read_medium_time'] = metrics['total_words'] / 250
