@@ -37,7 +37,6 @@ def extract_metrics(freeling_results, selected_lang):
 
             # - Number of sentences in text
             words = legibilidad.count_words(text)
-            print(morphological_analysis)
             metrics['total_sentences'] = len(morphological_analysis)
 
             # -Number of letters in text
