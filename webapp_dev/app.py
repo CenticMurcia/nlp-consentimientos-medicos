@@ -1,4 +1,3 @@
-import pandas as pd
 import streamlit as st
 
 import data_processing as dp
