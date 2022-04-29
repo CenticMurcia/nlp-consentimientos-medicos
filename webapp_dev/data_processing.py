@@ -1,11 +1,15 @@
 import logging
 import unicodedata
+import warnings
 
 import altair as alt
 import pandas as pd
 import streamlit as st
 
 import legibilidad
+import specialized_language as spec_lang
+
+warnings.filterwarnings('ignore', category=FutureWarning)
 
 
 def transform_language(language):
@@ -47,9 +51,9 @@ def extract_metrics(freeling_results, selected_lang):
             metrics['total_words'] = words
             # - Number of words per types in text
             metrics['total_unique_words'] = len(set([word for word
-                                                    in text.split() if
-                                                    word.isalpha() or
-                                                    word.isnumeric()]))
+                                                     in text.split() if
+                                                     word.isalpha() or
+                                                     word.isnumeric()]))
             # Time to read
             metrics['read_fast_time'] = metrics['total_words'] / 350
             metrics['read_medium_time'] = metrics['total_words'] / 250
@@ -62,8 +66,11 @@ def extract_metrics(freeling_results, selected_lang):
             metrics['gutierrez'] = legibilidad.gutierrez(text)
 
             # Specialized language
-            # metrics['count_legal_language'] = spec_lang.count_legal_language(text)
-            # metrics['count_medical_language'] = spec_lang.count_medical_language(text)
+            metrics['count_legal_language'] = spec_lang.count_legal_language(
+                text, selected_lang)
+            metrics[
+                'count_medical_language'] = spec_lang.count_medical_language(
+                text, selected_lang)
 
             # Morphological metrics
             metrics = metrics | morphological_metrics(morphological_analysis)

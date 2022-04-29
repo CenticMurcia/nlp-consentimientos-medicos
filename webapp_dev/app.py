@@ -67,10 +67,10 @@ if not dataframe.empty:
     selected_features = st.multiselect(
         "Seleccione las variables a comparar",
         list(dataframe.columns),
-        default=[
-            "total_sentences",
-            "total_words",
-        ],
+        # default=[
+        #     "total_sentences",
+        #     "total_words",
+        # ],
         help=(f'Seleccione las características que quiere visualizar.'
               f' Por ahora solo se soportan __2 variables simultáneas.__'),
     )

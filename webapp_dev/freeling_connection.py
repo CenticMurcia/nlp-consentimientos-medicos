@@ -45,10 +45,19 @@ def freeling_processing(files, language):
     # Collection containing an object for every file the
     # morphological_analysis. Transforming it to a json...
     with st.spinner('Procesando ficheros en freeling...'):
-        morphological_analysis = grequests.map(requests_list, size=20)
+        time1 = time.perf_counter()
+        morphological_analysis = grequests.imap(requests_list, size=10,
+                                                exception_handler=handler)
         morphological_jsons = [clean_json(element.json()) for element
                                in morphological_analysis]
+    time2 = time.perf_counter()
+    logging.info(time2-time1)
     return zip(morphological_jsons, strings, names)
+
+
+def handler(request, exception):
+    print(exception)
+    print(request)
 
 
 def connect_server():
@@ -58,7 +67,7 @@ def connect_server():
         request = create_freeling_request(
             document='Test',
             language='es')
-        if not request.ok:
+        if not request:
             retries += 1
             time.sleep(20)
         else:
