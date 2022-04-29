@@ -2,8 +2,10 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler
+import streamlit as st
 
 
+@st.experimental_memo(show_spinner=False)
 def extract_pca_metrics(dataframe):
     x = StandardScaler().fit_transform(dataframe.values)
     pca = PCA(n_components=2)
@@ -11,6 +13,7 @@ def extract_pca_metrics(dataframe):
     return principal_components, pca.components_
 
 
+@st.experimental_memo(show_spinner=False)
 def get_pca(dataframe):
     principal_components, components = extract_pca_metrics(dataframe)
 
@@ -30,6 +33,7 @@ def get_pca(dataframe):
     return pca_df, components_df
 
 
+@st.experimental_memo(show_spinner=False)
 def process_tsne(dataframe):
     x = StandardScaler().fit_transform(dataframe.values)
     tsne = TSNE(n_components=2, learning_rate='auto',

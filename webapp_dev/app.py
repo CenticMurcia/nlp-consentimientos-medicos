@@ -1,13 +1,13 @@
 import pandas as pd
 import streamlit as st
 
-import data_processing
+import data_processing as dp
+import freeling_connection as fc
 import machine_learning
 
 # -------------- #
 # --- WEBAPP --- #
 # -------------- #
-
 
 # Browser title, favicon and about section
 st.set_page_config(
@@ -35,6 +35,8 @@ with lang:
         ('Español', 'Catalán', 'Inglés', 'Portugués', 'Francés', 'Alemán'),
         index=0)
 
+selected_lang = dp.transform_language(selected_lang)
+
 # Files
 with file_uploader:
     uploaded_files = st.file_uploader(
@@ -46,7 +48,7 @@ with file_uploader:
 freeling_results = []
 if uploaded_files:
     try:
-        freeling_results = list(data_processing.freeling_processing(
+        freeling_results = list(fc.freeling_processing(
             uploaded_files, selected_lang))
     except UnicodeError as exc:
         st.error(f'{exc}')
@@ -54,23 +56,14 @@ if uploaded_files:
         st.error(f'{exc}')
 
 # Metrics extraction
-documents_metrics = []
+dataframe = None
 if freeling_results:
-    with st.spinner('Extrayendo métricas...'):
-        bar = st.progress(0)
-        for count, (morphological_analysis, text, filename) in enumerate(
-                freeling_results):
-            documents_metrics.append(
-                data_processing.extract_metrics(morphological_analysis,
-                                                text,
-                                                filename,
-                                                selected_lang))
-            bar.progress((count + 1) / len(freeling_results))
-        bar.empty()
+    dataframe = dp.extract_metrics(freeling_results, selected_lang)
+else:
+    st.stop()
 
 # SHOW PROCESSING RESULTS
-if documents_metrics:
-    dataframe = pd.DataFrame.from_records(documents_metrics, index='name')
+if not dataframe.empty:
 
     selected_features = st.multiselect(
         "Seleccione las variables a comparar",
@@ -96,10 +89,9 @@ if documents_metrics:
     # Plot if enough selected features and files
     if len(selected_features) > 1:
         df_show['name'] = df_show.index
-        st.altair_chart(data_processing.plot_selection(df_show))
+        st.altair_chart(dp.plot_selection(df_show))
     if df_show.shape[0] > 1:
         st.header('Análisis de componentes principales')
-        tsne = machine_learning.process_tsne(dataframe)
         pca, components = machine_learning.get_pca(dataframe)
 
         pca_col, space, components_col = st.columns([10, 1, 10])
@@ -109,7 +101,7 @@ if documents_metrics:
             st.download_button('Descargar .csv',
                                data=pca.to_csv().encode('utf-8'),
                                file_name='pca.csv')
-            st.altair_chart(data_processing.plot_pca(pca))
+            st.altair_chart(dp.plot_pca(pca))
 
         with components_col:
             st.subheader(f'Peso de cada característica en cada '
@@ -125,11 +117,12 @@ if documents_metrics:
                 range(1, len(components.columns) + 1),
                 index=0)
             st.altair_chart(
-                data_processing.plot_components(components, selected_component),
+                dp.plot_components(components, selected_component),
                 use_container_width=True)
 
         st.subheader('TSNE')
-        st.altair_chart(data_processing.plot_pca(tsne))
+        st.altair_chart(
+            dp.plot_pca(machine_learning.process_tsne(dataframe)))
 
     else:
         st.write(f"Necesitas al menos 2 ficheros y 2 variables a comparar para"

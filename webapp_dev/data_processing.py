@@ -1,16 +1,11 @@
 import logging
-import time
 import unicodedata
 
 import altair as alt
-import grequests
-import requests
+import pandas as pd
 import streamlit as st
 
 import legibilidad
-import specialized_language
-
-logging.basicConfig(format='%(levelname)s %(asctime)s %(message)s')
 
 
 def transform_language(language):
@@ -28,65 +23,56 @@ def transform_language(language):
         return 'ca'
 
 
-def create_freeling_request(document, filename, language='es', batch=False):
-    logging.info(f"Cache miss -> create_freeling_requests()")
-
-    language = transform_language(language)
-    request_data = {'username': st.secrets['api_username'],
-                    'password': st.secrets['api_passwd'],
-                    'filename': filename,
-                    'text_input': document,
-                    'language': language,
-                    'output': 'json',
-                    'interactive': '1'}
-
-    url = 'http://frodo.lsi.upc.edu:8080/TextWS/textservlet/ws/processQuery/morpho'
-    if batch:
-        r = grequests.post(url, files=request_data)
-    else:
-        r = requests.post(url, files=request_data)
-    return r
-
-
-@st.experimental_memo(show_spinner=False)
-def extract_metrics(freeling, text, filename, selected_lang):
+@st.experimental_memo(show_spinner=False, suppress_st_warning=True)
+def extract_metrics(freeling_results, selected_lang):
     logging.info(f"Cache miss -> extract_metrics()")
-    """Returns all the requested metrics for a text"""
-    metrics = {'name': filename}
-    # General Metrics
+    dataframe = pd.DataFrame()
+    with st.spinner('Extrayendo métricas...'):
+        bar = st.progress(0)
+        for count, (morphological_analysis, text, filename) in enumerate(
+                freeling_results):
+            """Returns all the requested metrics for a text"""
+            metrics = {'name': filename}
+            # General Metrics
 
-    # - Number of sentences in text
-    words = [words for sentence in freeling for words in sentence]
-    metrics['total_sentences'] = len(freeling)
+            # - Number of sentences in text
+            words = [words for sentence in morphological_analysis for words in
+                     sentence]
+            metrics['total_sentences'] = len(morphological_analysis)
 
-    # -Number of chars in text
-    metrics['total_chars'] = sum([len(word['form']) for word in words])
-    # - Number of syllables on text
-    metrics['total_syllables'] = legibilidad.count_all_syllables(text)
-    # - Number of words in text (tokens)
-    metrics['total_words'] = len(words)
-    # - Number of words per types in text
-    metrics['total_unique_words'] = len(set([word['form'] for word in words]))
-    # Time to read
-    metrics['read_fast_time'] = metrics['total_words'] / 350
-    metrics['read_medium_time'] = metrics['total_words'] / 250
-    metrics['read_slow_time'] = metrics['total_words'] / 150
+            # -Number of chars in text
+            metrics['total_chars'] = sum([len(word['form']) for word in words])
+            # - Number of syllables on text
+            metrics['total_syllables'] = legibilidad.count_all_syllables(text)
+            # - Number of words in text (tokens)
+            metrics['total_words'] = len(words)
+            # - Number of words per types in text
+            metrics['total_unique_words'] = len(
+                set([word['form'] for word in words]))
+            # Time to read
+            metrics['read_fast_time'] = metrics['total_words'] / 350
+            metrics['read_medium_time'] = metrics['total_words'] / 250
+            metrics['read_slow_time'] = metrics['total_words'] / 150
 
-    # Fernandez Huerta Index
-    metrics['fernandez_huerta'] = legibilidad.fernandez_huerta(text)
+            # Fernandez Huerta Index
+            metrics['fernandez_huerta'] = legibilidad.fernandez_huerta(text)
 
-    # Comprehensibility index
-    metrics['gutierrez'] = legibilidad.gutierrez(text)
+            # Comprehensibility index
+            metrics['gutierrez'] = legibilidad.gutierrez(text)
 
-    # Specialized language
-    spec_lang = specialized_language.SpecialicedLanguage(transform_language(
-        selected_lang))
-    metrics['count_legal_language'] = spec_lang.count_legal_language(text)
-    metrics['count_medical_language'] = spec_lang.count_medical_language(text)
+            # Specialized language
+            # metrics['count_legal_language'] = spec_lang.count_legal_language(text)
+            # metrics['count_medical_language'] = spec_lang.count_medical_language(text)
 
-    # Morphological metrics
-    metrics = metrics | morphological_metrics(freeling)
-    return metrics
+            # Morphological metrics
+            metrics = metrics | morphological_metrics(morphological_analysis)
+            df_dict = pd.DataFrame(metrics, index=[0])
+            dataframe = pd.concat([dataframe, df_dict])
+            bar.progress((count + 1) / len(freeling_results))
+        bar.empty()
+        dataframe.set_index('name', inplace=True)
+
+    return dataframe
 
 
 def sum_words(index, char, iterator):
@@ -244,70 +230,7 @@ def read_file(file):
     return string_data
 
 
-def clean_json(json_file):
-    return [sentence['tokens'] for paragraph in json_file['paragraphs'] for
-            sentence in paragraph['sentences']]
-
-
-@st.experimental_memo(show_spinner=False, ttl=60 * 60 * 3,
-                      suppress_st_warning=True)
-def freeling_processing(files, selected_language='es'):
-    logging.info(f"Cache miss -> freeling_processing()")
-    """Recieves a collection of files and creates async requests to the
-    freeling API. Returns a list of tuples with a json object containig the
-    morphological analysis and the original name of file.
-
-    :param files: a collection of texts
-    :param selected_language: language in which process the text (es, cat)
-    """
-    names = []
-    requests_list = []
-    strings = []
-    server_not_up = True
-    retries = 0
-    for uploaded_file in files:
-        try:
-            string_data = read_file(uploaded_file)
-        except UnicodeError:
-            raise UnicodeError(f'''File **{uploaded_file.name}** is not
-                    encoded in UTF-8 or Latin-1''')
-
-        with st.spinner('Conectando al servidor freeling. Esto podría '
-                        'tardar unos segundos...'):
-            if server_not_up:
-                while server_not_up and retries < 5:
-                    request = create_freeling_request(document=string_data,
-                                                      filename=uploaded_file.name,
-                                                      language=selected_language)
-                    if not request.ok:
-                        retries += 1
-                        time.sleep(20)
-                    else:
-                        server_not_up = False
-
-                if server_not_up:
-                    raise Exception(
-                        f'El servidor de Freeling no está disponible '
-                        f'en este momento. No es posible procesar '
-                        f'los ficheros. Inténtelo de nuevo más tarde.')
-
-        request = create_freeling_request(document=string_data,
-                                          filename=uploaded_file.name,
-                                          language=selected_language,
-                                          batch=True)
-        strings.append(string_data)
-        names.append(uploaded_file.name)
-        requests_list.append(request)
-
-    # Collection containing an object for every file the
-    # morphological_analysis. Transforming it to a json...
-    with st.spinner('Procesando ficheros en freeling...'):
-        morphological_analysis = grequests.imap(requests_list, size=10)
-        morphological_jsons = [clean_json(element.json()) for element
-                               in morphological_analysis]
-    return zip(morphological_jsons, strings, names)
-
-
+@st.experimental_memo(show_spinner=False)
 def plot_selection(data):
     graphic = (alt.Chart(data).encode(
         x=data.columns[0],
@@ -320,6 +243,7 @@ def plot_selection(data):
     return graphic
 
 
+@st.experimental_memo(show_spinner=False)
 def plot_pca(data):
     data.reset_index(level=0, inplace=True, drop=False)
     graphic = (alt.Chart(data).encode(
@@ -333,6 +257,7 @@ def plot_pca(data):
     return graphic
 
 
+@st.experimental_memo(show_spinner=False)
 def plot_components(data, component: int = 1):
     data = data.transpose()
     data.reset_index(inplace=True)
