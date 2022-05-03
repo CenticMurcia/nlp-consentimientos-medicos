@@ -72,6 +72,11 @@ def extract_metrics(freeling_results, selected_lang):
                 'count_medical_language'] = spec_lang.count_medical_language(
                 text, selected_lang)
 
+            k1, k1_5, k5_10 = spec_lang.count_most_common(text, selected_lang)
+            metrics['common_1k'] = k1
+            metrics['common_1k_5k'] = k1_5
+            metrics['common_5k_10k'] = k5_10
+
             # Morphological metrics
             metrics = metrics | morphological_metrics(morphological_analysis)
             df_dict = pd.DataFrame(metrics, index=[0])
