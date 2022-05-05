@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import time
 
@@ -46,37 +45,29 @@ def freeling_processing(files, language):
     with st.spinner('Procesando ficheros en freeling...'):
         time1 = time.perf_counter()
 
-        morphological_jsons = [clean_json(element.json()) for element
+        morphological_jsons = [clean_json(element) for element
                                in morphological_analysis]
     time2 = time.perf_counter()
     logging.info(time2 - time1)
     return zip(morphological_jsons, strings, names)
 
 
-def get_tasks(session, files, language):
+def get_tasks(session: aiohttp.ClientSession, files, language):
     tasks = []
     url = 'http://frodo.lsi.upc.edu:8080/TextWS/textservlet/ws/processQuery/morpho'
+    # url = 'https://httpbin.org/post'
     for document, filename in files:
         data = aiohttp.FormData()
 
-        # data.add_field('username',st.secrets['api_username'])
-        # data.add_field('password', st.secrets['api_passwd'])
-        # data.add_field('filename', filename)
-        # data.add_field('text_input', document)
-        # data.add_field('language', language)
-        # data.add_field('output', 'json')
-        # data.add_field('interactive', 1)
-        payload = {'username': st.secrets['api_username'],
-                   'password': st.secrets['api_passwd'],
-                   'filename': filename,
-                   'text_input': document,
-                   'language': language,
-                   'output': 'json',
-                   'interactive': '1'}
+        data.add_field('username', st.secrets['api_username'])
+        data.add_field('password', st.secrets['api_passwd'])
+        data.add_field('filename', filename, filename=filename)
+        data.add_field('text_input', document)
+        data.add_field('language', language)
+        data.add_field('output', 'json')
+        data.add_field('interactive', '1')
 
-        data.add_field('files', json.dumps(payload))
-
-        tasks.append(session.post(url, json=payload))
+        tasks.append(session.post(url, data=data))
     return tasks
 
 
@@ -84,8 +75,12 @@ async def freeling_requests(strings, filenames, language='es'):
     logging.info(f"Cache miss -> create_freeling_requests()")
     async with aiohttp.ClientSession() as session:
         tasks = get_tasks(session, zip(strings, filenames), language)
+
         responses = await asyncio.gather(*tasks)
-    return responses
+        results = []
+        for response in responses:
+            results.append(await response.json())
+    return results
 
 
 def clean_json(json_file):
@@ -120,5 +115,6 @@ def check_server():
                     'output': 'json',
                     'interactive': '1'}
     url = 'http://frodo.lsi.upc.edu:8080/TextWS/textservlet/ws/processQuery/morpho'
+    url = 'https://httpbin.org/post'
     resp = requests.post(url, files=request_data)
     return resp
