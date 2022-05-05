@@ -45,8 +45,8 @@ def freeling_processing(files, language):
     # Collection containing an object for every file the
     # morphological_analysis. Transforming it to a json...
     with st.spinner('Procesando ficheros en freeling...'):
-        morphological_analysis = grequests.imap(requests_list, size=10,
-                                                exception_handler=handler)
+        morphological_analysis = grequests.map(requests_list,
+                                               exception_handler=handler)
         morphological_jsons = [clean_json(element.json()) for element
                                in morphological_analysis]
     return zip(morphological_jsons, strings, names)
