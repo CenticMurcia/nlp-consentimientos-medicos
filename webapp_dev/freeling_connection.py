@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import time
-
+import json
 import aiohttp
 import requests
 import streamlit as st
@@ -25,7 +25,6 @@ def freeling_processing(files, language):
         connect_server()
 
     names = []
-    requests_list = []
     strings = []
 
     for uploaded_file in files:
@@ -37,25 +36,19 @@ def freeling_processing(files, language):
 
         strings.append(string_data)
         names.append(uploaded_file.name)
-
-    morphological_analysis = asyncio.run(freeling_requests(strings, names,
-                                                           language))
     # Collection containing an object for every file the
     # morphological_analysis. Transforming it to a json...
     with st.spinner('Procesando ficheros en freeling...'):
-        time1 = time.perf_counter()
-
-        morphological_jsons = [clean_json(element) for element
+        morphological_analysis = asyncio.run(freeling_requests(strings, names,
+                                                               language))
+        morphological_jsons = [clean_json(json.loads(element)) for element
                                in morphological_analysis]
-    time2 = time.perf_counter()
-    logging.info(time2 - time1)
     return zip(morphological_jsons, strings, names)
 
 
 def get_tasks(session: aiohttp.ClientSession, files, language):
     tasks = []
     url = 'http://frodo.lsi.upc.edu:8080/TextWS/textservlet/ws/processQuery/morpho'
-    # url = 'https://httpbin.org/post'
     for document, filename in files:
         data = aiohttp.FormData()
 
@@ -75,11 +68,11 @@ async def freeling_requests(strings, filenames, language='es'):
     logging.info(f"Cache miss -> create_freeling_requests()")
     async with aiohttp.ClientSession() as session:
         tasks = get_tasks(session, zip(strings, filenames), language)
-
         responses = await asyncio.gather(*tasks)
         results = []
         for response in responses:
-            results.append(await response.json())
+            results.append(await response.text())
+            print(await response.text())
     return results
 
 
@@ -115,6 +108,5 @@ def check_server():
                     'output': 'json',
                     'interactive': '1'}
     url = 'http://frodo.lsi.upc.edu:8080/TextWS/textservlet/ws/processQuery/morpho'
-    url = 'https://httpbin.org/post'
     resp = requests.post(url, files=request_data)
     return resp
