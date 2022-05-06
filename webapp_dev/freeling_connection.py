@@ -109,5 +109,4 @@ def check_server():
                     'interactive': '1'}
     url = 'http://frodo.lsi.upc.edu:8080/TextWS/textservlet/ws/processQuery/morpho'
     resp = requests.post(url, files=request_data)
-    print('EL SERVIDOR HA RESPONDIDO')
     return resp
