@@ -72,7 +72,6 @@ async def freeling_requests(strings, filenames, language='es'):
         results = []
         for response in responses:
             results.append(await response.text())
-            print(await response.text())
     return results
 
 
