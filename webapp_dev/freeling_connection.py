@@ -39,40 +39,42 @@ def freeling_processing(files, language):
     # Collection containing an object for every file the
     # morphological_analysis. Transforming it to a json...
     with st.spinner('Procesando ficheros en freeling...'):
-        morphological_analysis = asyncio.run(freeling_requests(strings, names,
-                                                               language))
-        morphological_jsons = [clean_json(json.loads(element)) for element
-                               in morphological_analysis]
+        morphological_analysis = asyncio.run(
+            freeling_requests(strings, names, language))
+        morphological_jsons = [clean_json(json.loads(element)) for element in
+                               morphological_analysis]
     return zip(morphological_jsons, strings, names)
 
 
-def get_tasks(session: aiohttp.ClientSession, files, language):
-    tasks = []
+async def make_requests(semaphore, string, filename, language):
     url = 'http://frodo.lsi.upc.edu:8080/TextWS/textservlet/ws/processQuery/morpho'
-    for document, filename in files:
-        data = aiohttp.FormData()
 
-        data.add_field('username', st.secrets['api_username'])
-        data.add_field('password', st.secrets['api_passwd'])
-        data.add_field('filename', filename, filename=filename)
-        data.add_field('text_input', document)
-        data.add_field('language', language)
-        data.add_field('output', 'json')
-        data.add_field('interactive', '1')
+    async with semaphore:
+        async with aiohttp.ClientSession() as session:
 
-        tasks.append(session.post(url, data=data))
-    return tasks
+            data = aiohttp.FormData()
+            data.add_field('username', st.secrets['api_username'])
+            data.add_field('password', st.secrets['api_passwd'])
+            data.add_field('filename', filename, filename=filename)
+            data.add_field('text_input', string)
+            data.add_field('language', language)
+            data.add_field('output', 'json')
+            data.add_field('interactive', '1')
+
+            logging.info(filename)
+
+            async with session.post(url, data=data) as response:
+                return await response.text()
 
 
 async def freeling_requests(strings, filenames, language='es'):
     logging.info(f"Cache miss -> create_freeling_requests()")
-    timeout = aiohttp.ClientTimeout()
-    async with aiohttp.ClientSession(timeout=timeout) as session:
-        tasks = get_tasks(session, zip(strings, filenames), language)
-        responses = await asyncio.gather(*tasks)
-        results = []
-        for response in responses:
-            results.append(await response.text())
+    sem = asyncio.Semaphore(1)
+
+    tasks = []
+    for string, filename in zip(strings, filenames):
+        tasks.append(make_requests(sem, string, filename, language))
+    results = await asyncio.gather(*tasks)
     return results
 
 
@@ -87,26 +89,25 @@ def connect_server():
     while not server_up and retries < 5:
         request = check_server()
         if not request:
+            logging.info('Fallo de conexión. Reintentándolo en 30 segundos')
             retries += 1
-            time.sleep(20)
+            time.sleep(30)
         else:
             server_up = True
 
     if not server_up:
-        raise Exception(
-            f'El servidor de Freeling no está disponible '
-            f'en este momento. No es posible procesar '
-            f'los ficheros. Inténtelo de nuevo más tarde.')
+        raise Exception(f'El servidor de Freeling no está disponible '
+                        f'en este momento. No es posible procesar '
+                        f'los ficheros. Inténtelo de nuevo más tarde.')
 
 
 def check_server():
+    logging.info('Comprobando estado del servidor')
     request_data = {'username': st.secrets['api_username'],
-                    'password': st.secrets['api_passwd'],
-                    'filename': 'File',
-                    'text_input': 'Test',
-                    'language': 'es',
-                    'output': 'json',
+                    'password': st.secrets['api_passwd'], 'filename': 'File',
+                    'text_input': 'Test', 'language': 'es', 'output': 'json',
                     'interactive': '1'}
     url = 'http://frodo.lsi.upc.edu:8080/TextWS/textservlet/ws/processQuery/morpho'
     resp = requests.post(url, files=request_data)
+    print('EL SERVIDOR HA RESPONDIDO')
     return resp
