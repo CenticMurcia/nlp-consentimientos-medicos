@@ -66,7 +66,8 @@ def get_tasks(session: aiohttp.ClientSession, files, language):
 
 async def freeling_requests(strings, filenames, language='es'):
     logging.info(f"Cache miss -> create_freeling_requests()")
-    async with aiohttp.ClientSession() as session:
+    timeout = aiohttp.ClientTimeout()
+    async with aiohttp.ClientSession(timeout=timeout) as session:
         tasks = get_tasks(session, zip(strings, filenames), language)
         responses = await asyncio.gather(*tasks)
         results = []
