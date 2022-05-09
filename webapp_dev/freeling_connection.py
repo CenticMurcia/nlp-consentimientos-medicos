@@ -61,7 +61,7 @@ async def make_requests(semaphore, string, filename, language):
             data.add_field('output', 'json')
             data.add_field('interactive', '1')
 
-            logging.info(filename)
+            logging.info(f'Processing {filename}')
 
             async with session.post(url, data=data) as response:
                 return await response.text()
@@ -69,7 +69,7 @@ async def make_requests(semaphore, string, filename, language):
 
 async def freeling_requests(strings, filenames, language='es'):
     logging.info(f"Cache miss -> create_freeling_requests()")
-    sem = asyncio.Semaphore(1)
+    sem = asyncio.Semaphore(2)
 
     tasks = []
     for string, filename in zip(strings, filenames):
