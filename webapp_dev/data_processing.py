@@ -271,16 +271,15 @@ def plot_pca(data):
 
 
 @st.experimental_memo(show_spinner=False)
-def plot_components(data, component: int = 1):
-    data = data.transpose()
+def plot_components(data, component):
     data.reset_index(inplace=True)
+    data = data.iloc[:, [0, component]]
     data = data.melt(id_vars=['index'])
-    data.sort_values(by=['index', 'value'], inplace=True,
-                     ascending=[True, False])
-    data = data[data['index'] == f'Componente {component}']
+    data.sort_values(by='value', inplace=True,
+                     ascending=False)
     graphic = (alt.Chart(data).mark_bar(color='red', opacity=0.5).encode(
         x=alt.X('value', title='Valor'),
-        y=alt.Y('variable', sort='-x', title='Variable'),
+        y=alt.Y('index', sort='-x', title='Variable'),
         tooltip=['value']
     ).interactive())
     return graphic

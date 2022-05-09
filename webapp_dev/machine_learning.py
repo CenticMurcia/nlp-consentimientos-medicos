@@ -8,24 +8,32 @@ import streamlit as st
 @st.experimental_memo(show_spinner=False)
 def extract_pca_metrics(dataframe):
     x = StandardScaler().fit_transform(dataframe.values)
-    pca = PCA(n_components=2)
+    pca = PCA(n_components=min([dataframe.shape[0], dataframe.shape[1], 10]))
     principal_components = pca.fit_transform(x)
-    return principal_components, pca.components_
+    components = pca.components_
+    explained_variance = pca.explained_variance_ratio_*100
+    return principal_components, components, explained_variance
 
 
 @st.experimental_memo(show_spinner=False)
 def get_pca(dataframe):
-    principal_components, components = extract_pca_metrics(dataframe)
+    principal_components, components, explained_variance = extract_pca_metrics(
+        dataframe)
+    print(len(explained_variance))
+    components_df = pd.DataFrame(data=components, columns=dataframe.columns,
+                                 index=[f'Componente {i}' for i in
+                                        range(1, len(components) + 1)])
 
-    components_df = pd.DataFrame(data=components,
-                                 columns=dataframe.columns,
-                                 index=[f'Componente {i}' for i in range(1, len(
-                                     components) + 1)])
     components_df = components_df.transpose()
+    for e in components_df.columns:
+        print(e)
+
+    components_df.columns = [f'{c} ({v:.3f}%)' for c, v in zip(components_df,
+                                                        explained_variance)]
 
     pca_df = pd.DataFrame(data=principal_components,
-                          columns=[f'Componente {i}' for i in range(1, len(
-                              components) + 1)])
+                          columns=[f'Componente {i}' for i in
+                                   range(1, len(components) + 1)])
     dataframe = dataframe.reset_index(level=0)
     pca_df = pd.concat([pca_df, dataframe['name']], axis=1)
     pca_df.set_index('name', inplace=True)
@@ -36,8 +44,8 @@ def get_pca(dataframe):
 @st.experimental_memo(show_spinner=False)
 def process_tsne(dataframe):
     x = StandardScaler().fit_transform(dataframe.values)
-    tsne = TSNE(n_components=2, learning_rate='auto',
-                init='pca', n_jobs=-1).fit_transform(x)
+    tsne = TSNE(n_components=2, learning_rate='auto', init='pca',
+                n_jobs=-1).fit_transform(x)
     tsne_df = pd.DataFrame(data=tsne,
                            columns=[f'Componente {i}' for i in range(1, 3)])
     dataframe = dataframe.reset_index(level=0)

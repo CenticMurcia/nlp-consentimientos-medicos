@@ -51,7 +51,6 @@ async def make_requests(semaphore, string, filename, language):
 
     async with semaphore:
         async with aiohttp.ClientSession() as session:
-
             data = aiohttp.FormData()
             data.add_field('username', st.secrets['api_username'])
             data.add_field('password', st.secrets['api_passwd'])
@@ -64,6 +63,7 @@ async def make_requests(semaphore, string, filename, language):
             logging.info(f'Processing {filename}')
 
             async with session.post(url, data=data) as response:
+                logging.info(f'{filename} response: {response.status}')
                 return await response.text()
 
 
