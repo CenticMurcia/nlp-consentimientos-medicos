@@ -19,14 +19,11 @@ def extract_pca_metrics(dataframe):
 def get_pca(dataframe):
     principal_components, components, explained_variance = extract_pca_metrics(
         dataframe)
-    print(len(explained_variance))
     components_df = pd.DataFrame(data=components, columns=dataframe.columns,
                                  index=[f'Componente {i}' for i in
                                         range(1, len(components) + 1)])
 
     components_df = components_df.transpose()
-    for e in components_df.columns:
-        print(e)
 
     components_df.columns = [f'{c} ({v:.3f}%)' for c, v in zip(components_df,
                                                         explained_variance)]
