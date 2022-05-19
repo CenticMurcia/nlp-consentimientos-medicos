@@ -69,7 +69,7 @@ async def make_requests(semaphore, string, filename, language):
 
 async def freeling_requests(strings, filenames, language='es'):
     logging.info(f"Cache miss -> create_freeling_requests()")
-    sem = asyncio.Semaphore(2)
+    sem = asyncio.Semaphore(1)
 
     tasks = []
     for string, filename in zip(strings, filenames):
