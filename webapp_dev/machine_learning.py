@@ -42,7 +42,7 @@ def get_pca(dataframe):
 def process_tsne(dataframe):
     x = StandardScaler().fit_transform(dataframe.values)
     tsne = TSNE(n_components=2, learning_rate='auto', init='pca',
-                n_jobs=-1).fit_transform(x)
+                n_jobs=-1, perplexity=5).fit_transform(x)
     tsne_df = pd.DataFrame(data=tsne,
                            columns=[f'Componente {i}' for i in range(1, 3)])
     dataframe = dataframe.reset_index(level=0)

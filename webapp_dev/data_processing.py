@@ -40,7 +40,6 @@ def extract_metrics(freeling_results, selected_lang):
             # General Metrics
 
             # - Number of sentences in text
-            words = legibilidad.count_words(text)
             metrics['total_sentences'] = len(morphological_analysis)
 
             # -Number of letters in text
@@ -48,7 +47,7 @@ def extract_metrics(freeling_results, selected_lang):
             # - Number of syllables on text
             metrics['total_syllables'] = legibilidad.count_all_syllables(text)
             # - Number of words in text (tokens)
-            metrics['total_words'] = words
+            metrics['total_words'] = legibilidad.count_words(text)
             # - Number of words per types in text
             metrics['total_unique_words'] = len(set([word for word
                                                      in text.split() if
