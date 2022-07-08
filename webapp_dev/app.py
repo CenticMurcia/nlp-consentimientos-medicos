@@ -19,11 +19,9 @@ st.set_page_config(
     }
 )
 
-st.title(f'Analizador morfosintáctico')
-st.write(f"""Herramienta para el análisis de consentimientos médicos para la
-             determinación de su legibilidad y comprensibilidad desarrollada por
-             el Centro tecnológico de las Tecnologías de la Información y la
-             Comunicación de Murcia (CENTIC).""")
+st.title(f'ProText GENTT.')
+st.write(f"""Prototipo para la anotación automática, procesado y extracción de métricas (legibilidad, frecuencia léxica y propiedades morfosintácticas) de textos en castellano y catalán.
+Diseñado e implementado por Pascual Perez-Paredes y el CENTIC a partir de la propuesta científica del Grupo de investigación GENTT de la Universitat Jaume I.""")
 
 # Language selection and file uploader columns
 lang, space, file_uploader = st.columns([1, 0.5, 3])
